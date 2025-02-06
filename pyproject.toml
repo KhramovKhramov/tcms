@@ -1,12 +1,7 @@
-
-# Проект и авторы
 [project]
 name = "tcms"
 version = "0.1.0"
 description = "Внутренняя система теннисного центра для контроля кортов, групп спортсменов, тренировок и абонементов"
-
-[authors]
-name = "Pavel Khramov"
 
 # Зависимости
 dependencies = [
