@@ -30,6 +30,11 @@ INSTALLED_APPS = [
     'drf_spectacular',
 ]
 
+INSTALLED_APPS.extend([
+    "apps.person.apps.PersonConfig",
+])
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -127,4 +132,9 @@ SPECTACULAR_SETTINGS = {
     'VERSION': os.getenv('VERSION'),
     "SERVE_INCLUDE_SCHEMA": False, # исключить эндпоинт /schema
     "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        'docExpansion': 'none',
+    },
 }
+
+AUTH_USER_MODEL = 'person.Person'
