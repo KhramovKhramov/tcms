@@ -1,0 +1,51 @@
+
+# Проект и авторы
+[project]
+name = "tcms"
+version = "0.1.0"
+description = "Внутренняя система теннисного центра для контроля кортов, групп спортсменов, тренировок и абонементов"
+
+[authors]
+name = "Pavel Khramov"
+
+# Зависимости
+dependencies = [
+    "Django~=5.1.6",
+    "djangorestframework~=3.15.2",
+    "drf-spectacular~=0.28.0",
+    "pip-tools~=7.4.1",
+    "psycopg2-binary~=2.9.10",
+]
+
+# конфиги RUFF
+[tool.ruff]
+line-length = 79
+indent-width = 4
+show-fixes = true
+src = ["tcms"]
+
+extend-exclude =[
+    "migrations",
+    "settings.py",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "B",    # flake8-bugbear
+    "I",    # isort
+    "ICN",  # flake8-import-conventions
+    "PGH",  # pygrep-hooks
+    "PIE",  # flake8-pie
+    "PT",   # flake8-pytest-style
+    "RET",  # flake8-return
+    "T20",  # flake8-print
+    "UP",   # pyupgrade
+    "YTT",  # flake8-2020
+]
+
+[tool.ruff.format]
+quote-style = "single"
+skip-magic-trailing-comma = false
