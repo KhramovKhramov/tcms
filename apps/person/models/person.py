@@ -63,11 +63,11 @@ class Person(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'пользователь'
         verbose_name_plural = 'пользователи'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.full_name
 
     @cached_property
-    def full_name(self):
+    def full_name(self) -> str:
         """Возвращает ФИО пользователя."""
 
         full_name = (
@@ -77,7 +77,7 @@ class Person(AbstractBaseUser, PermissionsMixin):
         return full_name.strip()
 
     @property
-    def is_staff(self):
+    def is_staff(self) -> bool:
         """Проперти для панели администратора."""
 
         return self.is_superuser
