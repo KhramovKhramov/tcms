@@ -71,7 +71,7 @@ class Person(AbstractBaseUser, PermissionsMixin):
         """Возвращает ФИО пользователя."""
 
         full_name = (
-            f"{self.last_name} {self.first_name} {self.patronymic or ''}"
+            f'{self.last_name} {self.first_name} {self.patronymic or ""}'
         )
 
         return full_name.strip()
