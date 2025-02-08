@@ -1,6 +1,6 @@
 import pytest
 
-from apps.person.tests.factories.person import PersonFactory
+from apps.user.tests.factories.person import PersonFactory
 
 
 class TestPersonModel:

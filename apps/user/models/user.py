@@ -2,14 +2,14 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils.functional import cached_property
 
-from apps.person.models.choices import GenderType
-from apps.person.models.managers import PersonManager
+from apps.user.models.choices import GenderType
+from apps.user.models.managers import UserManager
 
 
-class Person(AbstractBaseUser, PermissionsMixin):
-    """Модель пользователя системы / физического лица."""
+class User(AbstractBaseUser, PermissionsMixin):
+    """Модель пользователя системы."""
 
-    objects = PersonManager()
+    objects = UserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'date_of_birth', 'phone']
@@ -33,7 +33,7 @@ class Person(AbstractBaseUser, PermissionsMixin):
         db_index=True,
     )
     date_of_birth = models.DateField(
-        verbose_name='Дата рождения', db_index=True
+        verbose_name='Дата рождения',
     )
     gender = models.CharField(
         verbose_name='Пол',

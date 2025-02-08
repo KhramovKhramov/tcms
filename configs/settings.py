@@ -33,7 +33,7 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS.extend([
-    "apps.person.apps.PersonConfig",
+    "apps.user.apps.UserConfig",
 ])
 
 
@@ -150,7 +150,7 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-AUTH_USER_MODEL = 'person.Person'
+AUTH_USER_MODEL = 'user.User'
 
 
 SIMPLE_JWT = {

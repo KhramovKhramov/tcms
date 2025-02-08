@@ -1,14 +1,14 @@
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
-from apps.person.models import Person
+from apps.user.models import User
 
 
-class PersonSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """Сериализатор данных пользователя."""
 
     class Meta:
-        model = Person
+        model = User
         fields = (
             'email',
             'password',

@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from apps.person.models import Person
+from apps.user.models import User
 
 
-@admin.register(Person)
-class PersonModelAdmin(admin.ModelAdmin):
+@admin.register(User)
+class UserModelAdmin(admin.ModelAdmin):
     list_display = (
         'get_full_name',
         'email',

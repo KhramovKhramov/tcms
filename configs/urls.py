@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import (
 )
 
 api_urlpatterns = [
-    path('persons/', include('apps.person.urls'), name='persons'),
+    path('users/', include('apps.user.urls'), name='users'),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
         'schema/swagger/',

@@ -1,10 +1,10 @@
 from rest_framework import routers
 
-from apps.person.api.views import PersonViewSet
+from apps.user.api.views import UserViewSet
 
 router = routers.SimpleRouter()
 
-router.register('', PersonViewSet, 'persons')
+router.register('', UserViewSet, 'users')
 
 urlpatterns = []
 urlpatterns += router.urls

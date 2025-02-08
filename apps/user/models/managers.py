@@ -1,7 +1,9 @@
 from django.contrib.auth.base_user import BaseUserManager
 
 
-class PersonManager(BaseUserManager):
+class UserManager(BaseUserManager):
+    """Менеджер для модели пользователя."""
+
     use_in_migrations = True
 
     def create_user(self, email, password=None, **kwargs):

@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filters
 
 
-class PersonFilter(filters.FilterSet):
+class UserFilter(filters.FilterSet):
     """Фильтрация и сортировка пользователей."""
 
     # Фильтры
