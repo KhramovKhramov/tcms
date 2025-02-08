@@ -2,6 +2,7 @@ import pytest
 
 from apps.person.tests.factories.person import PersonFactory
 
+
 class TestPersonModel:
     """Тесты модели пользователя."""
 
@@ -16,7 +17,8 @@ class TestPersonModel:
 
         for person in [*persons, another_person]:
             full_name = (
-                f'{person.last_name} {person.first_name} {person.patronymic or ""}'
+                f'{person.last_name} {person.first_name} '
+                f'{person.patronymic or ""}'
             )
 
             assert person.full_name == full_name.strip()
