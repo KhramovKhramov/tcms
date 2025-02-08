@@ -10,6 +10,7 @@ class PersonFilter(filters.FilterSet):
 
     # Сортировка
     # TODO добавить фильтрацию и сортировку по ФИО
+    # TODO Добавить фильтры по ролям
     ordering = filters.OrderingFilter(
         fields={'created_at': 'created_at'},
         field_labels={'created_at': 'Дата и время регистрации'},

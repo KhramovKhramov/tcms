@@ -1,0 +1,18 @@
+import factory
+
+from apps.person.models import Person
+from apps.person.models.choices import GenderType
+
+
+class PersonFactory(factory.django.DjangoModelFactory):
+    """Фабрика для тестов с моделью пользователя."""
+
+    last_name = factory.Faker('last_name_female', locale='ru_RU')
+    first_name = factory.Faker('first_name_female', locale='ru_RU')
+    date_of_birth = factory.Faker('date_of_birth', minimum_age=18)
+    gender = GenderType.FEMALE
+    email = factory.Faker('email', domain='example.com', safe=True)
+    phone = factory.Faker('numerify', text='+7(9##)###-####')
+
+    class Meta:
+        model = Person
