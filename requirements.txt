@@ -16,15 +16,18 @@ click==8.1.8
     # via pip-tools
 django==5.1.6
     # via
+    #   django-filter
     #   djangorestframework
     #   drf-spectacular
-    #   configs-1 (pyproject.toml)
+    #   tcms (pyproject.toml)
+django-filter==24.3
+    # via tcms (pyproject.toml)
 djangorestframework==3.15.2
     # via
     #   drf-spectacular
-    #   configs-1 (pyproject.toml)
+    #   tcms (pyproject.toml)
 drf-spectacular==0.28.0
-    # via configs-1 (pyproject.toml)
+    # via tcms (pyproject.toml)
 inflection==0.5.1
     # via drf-spectacular
 jsonschema==4.23.0
@@ -34,9 +37,9 @@ jsonschema-specifications==2024.10.1
 packaging==24.2
     # via build
 pip-tools==7.4.1
-    # via configs-1 (pyproject.toml)
+    # via tcms (pyproject.toml)
 psycopg2-binary==2.9.10
-    # via configs-1 (pyproject.toml)
+    # via tcms (pyproject.toml)
 pyproject-hooks==1.2.0
     # via
     #   build

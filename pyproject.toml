@@ -10,7 +10,11 @@ dependencies = [
     "drf-spectacular~=0.28.0",
     "pip-tools~=7.4.1",
     "psycopg2-binary~=2.9.10",
+    "django-filter~=24.3",
 ]
+
+[tool.setuptools]
+py-modules = []
 
 # конфиги RUFF
 [tool.ruff]
