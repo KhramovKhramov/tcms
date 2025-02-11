@@ -1,10 +1,10 @@
 import factory
 
-from apps.user.models import Person
+from apps.user.models import User
 from apps.user.models.choices import GenderType
 
 
-class PersonFactory(factory.django.DjangoModelFactory):
+class UserFactory(factory.django.DjangoModelFactory):
     """Фабрика для тестов с моделью пользователя."""
 
     last_name = factory.Faker('last_name_female', locale='ru_RU')
@@ -15,4 +15,4 @@ class PersonFactory(factory.django.DjangoModelFactory):
     phone = factory.Faker('numerify', text='+7(9##)###-####')
 
     class Meta:
-        model = Person
+        model = User
