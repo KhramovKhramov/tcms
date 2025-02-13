@@ -11,3 +11,4 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-id')
     serializer_class = UserSerializer
     filterset_class = UserFilter
+    http_method_names = ['get', 'post', 'patch', 'delete']

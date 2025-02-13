@@ -17,8 +17,7 @@ class TestUserModel:
 
         for user in [*users, another_user]:
             full_name = (
-                f'{user.last_name} {user.first_name} '
-                f'{user.patronymic or ""}'
+                f'{user.last_name} {user.first_name} {user.patronymic or ""}'
             )
 
             assert user.full_name == full_name.strip()
