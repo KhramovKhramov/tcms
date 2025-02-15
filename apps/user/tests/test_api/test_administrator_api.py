@@ -12,6 +12,8 @@ from apps.user.tests.test_api.utils import serialize_user
 
 @pytest.mark.django_db
 class TestAdministratorCRUDApi:
+    """Тесты проверки CRUD-операций API администраторов."""
+
     model = Administrator
     factory = AdministratorFactory
     list_url = staticmethod(lambda: get_api_url('administrators'))

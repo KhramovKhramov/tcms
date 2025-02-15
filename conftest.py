@@ -62,6 +62,7 @@ def authorized_superuser_client(test_superuser) -> APIClient:
 def get_api_url(basename, pk: int | None = None) -> str:
     """Получение url для запроса через APIClient."""
 
+    # TODO добавить возможность создавать url для кастомных экшенов
     if pk is None:
         return reverse(f'{basename}-list')
     return reverse(f'{basename}-detail', kwargs={'pk': pk})

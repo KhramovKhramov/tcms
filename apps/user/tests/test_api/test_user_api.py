@@ -1,15 +1,19 @@
 import pytest
 from conftest import get_api_url
 from django.conf import settings
+from django.utils.timezone import now
 from rest_framework import status
+from rest_framework.reverse import reverse
 
-from apps.user.models import User
+from apps.user.models import Administrator, User
 from apps.user.tests.factories import UserFactory
 from apps.user.tests.test_api.utils import serialize_user
 
 
 @pytest.mark.django_db
 class TestUserCRUDApi:
+    """Тесты проверки CRUD-операций API пользователей."""
+
     model = User
     factory = UserFactory
     list_url = staticmethod(lambda: get_api_url('users'))
@@ -163,3 +167,35 @@ class TestUserCRUDApi:
         with django_assert_max_num_queries(2):
             response = authorized_client.get(self.list_url())
             assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestUserApi:
+    """Тесты API пользователей."""
+
+    appoint_administrator_url = staticmethod(
+        lambda pk: reverse('users-appoint-administrator', kwargs={'pk': pk})
+    )
+
+    def test_appoint_administrator(self, authorized_client, test_user):
+        """Тест проверки назначения пользователя администратором."""
+
+        response = authorized_client.post(
+            self.appoint_administrator_url(test_user.pk)
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        # Проверяем, что администратор создан
+        assert Administrator.objects.filter(
+            user=test_user, date_from=now().date(), date_to__isnull=True
+        ).exists()
+
+        # Проверяем, что если у пользователя уже есть действующая роль
+        # администратора, создать еще одну нельзя
+        response = authorized_client.post(
+            self.appoint_administrator_url(test_user.pk)
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data[0] == (
+            'У пользователя уже есть действующая роль администратора'
+        )
