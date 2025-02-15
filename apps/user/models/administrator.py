@@ -1,8 +1,12 @@
 from django.db import models
 
+from apps.user.models.managers import AdministratorManager
+
 
 class Administrator(models.Model):
     """Модель роли администратора."""
+
+    objects = AdministratorManager()
 
     user = models.ForeignKey(
         to='user.User',
