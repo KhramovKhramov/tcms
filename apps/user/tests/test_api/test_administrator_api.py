@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from rest_framework import status
 
 from apps.user.models import Administrator
-from apps.user.tests.factories import AdministratorFactory
+from apps.user.tests.factories import AdministratorFactory, UserFactory
 from apps.user.tests.test_api.utils import serialize_user
 
 
@@ -119,3 +119,100 @@ class TestAdministratorApi:
         assert response.data[0] == (
             'Роль данного администратора уже не является действующей'
         )
+
+
+@pytest.mark.django_db
+class TestAdministratorFilters:
+    """Тесты фильтров и сортировки администраторов."""
+
+    list_url = staticmethod(lambda: get_api_url('administrators', 'list'))
+
+    @pytest.fixture
+    def prepared_data(self) -> list[Administrator]:
+        """
+        Фикстура, возвращающая тестовые данные
+        для проверки фильтрации и сортировки.
+        """
+
+        # Данные пользователей
+        user_data = [
+            {
+                'last_name': 'Кривоногова',
+                'first_name': 'Алевтина',
+                'patronymic': 'Васильевна',
+            },
+            {
+                'last_name': 'Иванов',
+                'first_name': 'Иван',
+                'patronymic': 'Иванович',
+            },
+            {
+                'last_name': 'Большакова',
+                'first_name': 'Кристина',
+                'patronymic': 'Сергеевна',
+            },
+        ]
+
+        # Создание пользователей
+        users = [UserFactory.create(**data) for data in user_data]
+
+        # Создаем и возвращаем администраторов для тестов
+        return [
+            AdministratorFactory.create(
+                user=user,
+            )
+            for user in users
+        ]
+
+    @pytest.mark.parametrize(
+        ('filter_param', 'expected_objects'),
+        [
+            ({'full_name': 'ив'}, [1, 0]),
+            ({'full_name': 'Крис'}, [2]),
+        ],
+    )
+    def test_filters(
+        self, authorized_client, prepared_data, filter_param, expected_objects
+    ):
+        """Тесты фильтрации."""
+
+        response = authorized_client.get(
+            self.list_url(),
+            data=filter_param,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()['results']
+
+        actual_ids = [item['id'] for item in data]
+        expected_ids = [prepared_data[i].pk for i in expected_objects]
+
+        assert actual_ids == expected_ids
+
+    @pytest.mark.parametrize(
+        ('ordering_param', 'expected_objects'),
+        [
+            ({'ordering': ''}, [2, 1, 0]),
+            ({'ordering': 'full_name'}, [2, 1, 0]),
+            ({'ordering': '-full_name'}, [0, 1, 2]),
+        ],
+    )
+    def test_ordering(
+        self,
+        authorized_client,
+        prepared_data,
+        ordering_param,
+        expected_objects,
+    ):
+        """Тесты сортировки."""
+
+        response = authorized_client.get(
+            self.list_url(),
+            data=ordering_param,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()['results']
+
+        actual_ids = [item['id'] for item in data]
+        expected_ids = [prepared_data[i].pk for i in expected_objects]
+
+        assert actual_ids == expected_ids
