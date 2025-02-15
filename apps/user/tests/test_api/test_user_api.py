@@ -3,7 +3,6 @@ from conftest import get_api_url
 from django.conf import settings
 from django.utils.timezone import now
 from rest_framework import status
-from rest_framework.reverse import reverse
 
 from apps.user.models import Administrator, User
 from apps.user.tests.factories import UserFactory
@@ -16,8 +15,8 @@ class TestUserCRUDApi:
 
     model = User
     factory = UserFactory
-    list_url = staticmethod(lambda: get_api_url('users'))
-    detail_url = staticmethod(lambda pk: get_api_url('users', pk=pk))
+    list_url = staticmethod(lambda: get_api_url('users', 'list'))
+    detail_url = staticmethod(lambda pk: get_api_url('users', 'detail', pk=pk))
 
     @pytest.fixture
     def prepared_instances(self) -> list[User]:
@@ -174,7 +173,7 @@ class TestUserApi:
     """Тесты API пользователей."""
 
     appoint_administrator_url = staticmethod(
-        lambda pk: reverse('users-appoint-administrator', kwargs={'pk': pk})
+        lambda pk: get_api_url('users', 'appoint-administrator', pk=pk)
     )
 
     def test_appoint_administrator(self, authorized_client, test_user):

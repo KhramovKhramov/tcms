@@ -5,7 +5,6 @@ from conftest import get_api_url
 from django.conf import settings
 from django.utils.timezone import now
 from rest_framework import status
-from rest_framework.reverse import reverse
 
 from apps.user.models import Administrator
 from apps.user.tests.factories import AdministratorFactory
@@ -18,7 +17,7 @@ class TestAdministratorCRUDApi:
 
     model = Administrator
     factory = AdministratorFactory
-    list_url = staticmethod(lambda: get_api_url('administrators'))
+    list_url = staticmethod(lambda: get_api_url('administrators', 'list'))
 
     @pytest.fixture
     def prepared_instances(self) -> list[Administrator]:
@@ -92,9 +91,7 @@ class TestAdministratorApi:
     """Тесты API администраторов."""
 
     cancel_administrator_url = staticmethod(
-        lambda pk: reverse(
-            'administrators-cancel-administrator', kwargs={'pk': pk}
-        )
+        lambda pk: get_api_url('administrators', 'cancel-administrator', pk=pk)
     )
 
     def test_cancel_administrator(self, authorized_client):
