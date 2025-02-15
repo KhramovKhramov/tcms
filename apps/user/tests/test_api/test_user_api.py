@@ -1,5 +1,3 @@
-from datetime import date
-
 import pytest
 from conftest import get_api_url
 from django.conf import settings
@@ -7,6 +5,7 @@ from rest_framework import status
 
 from apps.user.models import User
 from apps.user.tests.factories import UserFactory
+from apps.user.tests.test_api.utils import serialize_user
 
 
 @pytest.mark.django_db
@@ -65,18 +64,7 @@ class TestUserCRUDApi:
     def _serialize_instance_detail(instance: User) -> dict:
         """Сериализация объекта модели для метода retrieve()."""
 
-        return {
-            'id': instance.pk,
-            'email': instance.email,
-            'first_name': instance.first_name,
-            'last_name': instance.last_name,
-            'patronymic': instance.patronymic,
-            'date_of_birth': instance.date_of_birth.strftime('%Y-%m-%d')
-            if isinstance(instance.date_of_birth, date)
-            else instance.date_of_birth,
-            'gender': instance.gender,
-            'phone': instance.phone,
-        }
+        return serialize_user(instance)
 
     def _serialize_instance_list(self, instance: User) -> dict:
         """Сериализация объекта модели для метода list()."""

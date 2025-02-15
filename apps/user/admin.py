@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.user.models import User
+from apps.user.models import Administrator, User
 
 
 @admin.register(User)
@@ -17,3 +17,12 @@ class UserModelAdmin(admin.ModelAdmin):
         return obj.full_name
 
     get_full_name.short_description = 'ФИО'
+
+
+@admin.register(Administrator)
+class AdministratorModelAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'date_from',
+        'date_to',
+    )
