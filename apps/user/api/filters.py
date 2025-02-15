@@ -15,3 +15,9 @@ class UserFilter(filters.FilterSet):
         fields={'created_at': 'created_at'},
         field_labels={'created_at': 'Дата и время регистрации'},
     )
+
+
+class AdministratorFilter(filters.FilterSet):
+    pass
+
+    # TODO добавить сортировку по активности и сортировку по ФИО юзера

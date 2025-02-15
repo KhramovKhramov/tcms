@@ -83,3 +83,10 @@ class TestAdministratorCRUDApi:
         with django_assert_max_num_queries(2):
             response = authorized_client.get(self.list_url())
             assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestAdministratorApi:
+    """Тесты API администраторов."""
+
+    # TODO добавить тест на окончание роли администратора

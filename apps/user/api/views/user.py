@@ -52,5 +52,4 @@ class UserViewSet(viewsets.ModelViewSet):
         administrator = UserAppointAdministratorService(user).execute()
 
         response_serializer = AdministratorSerializer(administrator)
-
         return Response(response_serializer.data, status=status.HTTP_200_OK)
