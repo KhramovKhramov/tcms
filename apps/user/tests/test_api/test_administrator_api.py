@@ -3,7 +3,9 @@ from datetime import date
 import pytest
 from conftest import get_api_url
 from django.conf import settings
+from django.utils.timezone import now
 from rest_framework import status
+from rest_framework.reverse import reverse
 
 from apps.user.models import Administrator
 from apps.user.tests.factories import AdministratorFactory
@@ -89,4 +91,34 @@ class TestAdministratorCRUDApi:
 class TestAdministratorApi:
     """Тесты API администраторов."""
 
-    # TODO добавить тест на окончание роли администратора
+    cancel_administrator_url = staticmethod(
+        lambda pk: reverse(
+            'administrators-cancel-administrator', kwargs={'pk': pk}
+        )
+    )
+
+    def test_cancel_administrator(self, authorized_client):
+        """Тест окончания действия роли администратора."""
+
+        # Создаем данные
+        administrator = AdministratorFactory.create()
+
+        # Проверяем окончание действия роли
+        response = authorized_client.post(
+            self.cancel_administrator_url(administrator.pk)
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        # Проверяем, что действие роли администратора окончено
+        administrator.refresh_from_db()
+        assert administrator.date_to == now().date()
+
+        # Проверяем, что если роль администратора уже недействующая, нельзя
+        # окончить действие снова
+        response = authorized_client.post(
+            self.cancel_administrator_url(administrator.pk)
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data[0] == (
+            'Роль данного администратора уже не является действующей'
+        )
