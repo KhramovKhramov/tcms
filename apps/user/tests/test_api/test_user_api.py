@@ -1,5 +1,5 @@
 import pytest
-from conftest import get_api_url
+from conftest import check_filters_and_ordering, get_api_url
 from django.conf import settings
 from django.utils.timezone import now
 from rest_framework import status
@@ -197,4 +197,100 @@ class TestUserApi:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data[0] == (
             'У пользователя уже есть действующая роль администратора'
+        )
+
+
+@pytest.mark.django_db
+class TestUserFilters:
+    """Тесты фильтров и сортировки пользователей."""
+
+    list_url = staticmethod(lambda: get_api_url('users', 'list'))
+
+    @pytest.fixture
+    def prepared_data(self, test_user) -> list[User]:
+        """
+        Фикстура, возвращающая тестовые данные
+        для проверки фильтрации и сортировки.
+        """
+
+        # Данные пользователей
+        user_data = [
+            {
+                'last_name': 'Ученикова',
+                'first_name': 'Елизавета',
+                'patronymic': 'Вадимовна',
+                'email': 'lizasergeevna@gmail.com',
+                'phone': '+79129229090',
+            },
+            {
+                'last_name': 'Сергеев',
+                'first_name': 'Сергей',
+                'patronymic': 'Сергеевич',
+                'email': 'serg1992@mail.ru',
+                'phone': '+79189996699',
+            },
+            {
+                'last_name': 'Ничипорчук',
+                'first_name': 'Александра',
+                'patronymic': 'Александровна',
+                'email': '9199228756@gmail.com',
+                'phone': '+79199228756',
+            },
+        ]
+
+        # Создаем и возвращаем пользователей для теста
+        users = [UserFactory.create(**data) for data in user_data]
+        users.insert(0, test_user)
+
+        return users
+
+    @pytest.mark.parametrize(
+        # Учитываем в итоговом результате test_user из фикстуры авторизации
+        ('filter_param', 'expected_objects'),
+        [
+            ({'full_name': 'Лиза'}, [1]),
+            ({'full_name': 'вна'}, [3, 1]),
+            ({'email': 'serg'}, [2, 1]),
+            ({'phone': '912'}, [1]),
+        ],
+    )
+    def test_filters(
+        self, authorized_client, prepared_data, filter_param, expected_objects
+    ):
+        """Тесты фильтрации."""
+
+        check_filters_and_ordering(
+            self.list_url(),
+            authorized_client,
+            prepared_data,
+            filter_param,
+            expected_objects,
+        )
+
+    @pytest.mark.parametrize(
+        # Учитываем в итоговом результате test_user из фикстуры авторизации
+        ('ordering_param', 'expected_objects'),
+        [
+            ({'ordering': ''}, [3, 2, 1, 0]),
+            ({'ordering': 'full_name'}, [3, 2, 0, 1]),
+            ({'ordering': '-full_name'}, [1, 0, 2, 3]),
+            ({'ordering': 'created_at'}, [0, 1, 2, 3]),
+            ({'ordering': '-created_at'}, [3, 2, 1, 0]),
+        ],
+    )
+    def test_ordering(
+        self,
+        authorized_client,
+        prepared_data,
+        ordering_param,
+        expected_objects,
+    ):
+        """Тесты сортировки."""
+
+        check_filters_and_ordering(
+            self.list_url(),
+            authorized_client,
+            prepared_data,
+            ordering_param,
+            expected_objects,
         )

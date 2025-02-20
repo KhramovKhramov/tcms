@@ -12,6 +12,11 @@ def test_user() -> User:
 
     return UserFactory.create(
         is_superuser=False,
+        last_name='Тестовый',
+        first_name='Пользователь',
+        patronymic='Тестович',
+        email='testuser@example.com',
+        phone='+79996669999',
     )
 
 

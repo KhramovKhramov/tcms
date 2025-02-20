@@ -34,7 +34,7 @@ class UserFilter(filters.FilterSet):
     def full_name_filter(self, qs, name, value):
         """Фильтрация по ФИО пользователя."""
 
-        return qs.with_full_name_annotation.filter(
+        return qs.with_full_name_annotation().filter(
             full_name__icontains=value,
         )
 
