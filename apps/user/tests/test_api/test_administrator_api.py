@@ -1,7 +1,7 @@
 from datetime import date
 
 import pytest
-from conftest import get_api_url
+from conftest import check_filters_and_ordering, get_api_url
 from django.conf import settings
 from django.utils.timezone import now
 from rest_framework import status
@@ -176,17 +176,13 @@ class TestAdministratorFilters:
     ):
         """Тесты фильтрации."""
 
-        response = authorized_client.get(
+        check_filters_and_ordering(
             self.list_url(),
-            data=filter_param,
+            authorized_client,
+            prepared_data,
+            filter_param,
+            expected_objects,
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()['results']
-
-        actual_ids = [item['id'] for item in data]
-        expected_ids = [prepared_data[i].pk for i in expected_objects]
-
-        assert actual_ids == expected_ids
 
     @pytest.mark.parametrize(
         ('ordering_param', 'expected_objects'),
@@ -205,14 +201,10 @@ class TestAdministratorFilters:
     ):
         """Тесты сортировки."""
 
-        response = authorized_client.get(
+        check_filters_and_ordering(
             self.list_url(),
-            data=ordering_param,
+            authorized_client,
+            prepared_data,
+            ordering_param,
+            expected_objects,
         )
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()['results']
-
-        actual_ids = [item['id'] for item in data]
-        expected_ids = [prepared_data[i].pk for i in expected_objects]
-
-        assert actual_ids == expected_ids
