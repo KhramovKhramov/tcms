@@ -3,7 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator
 from django.db import models
 
-from apps.training_process.models.choices import PlayingLevel
+from apps.training_process.models.choices import GroupStatus, PlayingLevel
 
 
 class Group(models.Model):
@@ -18,6 +18,10 @@ class Group(models.Model):
         max_length=3000,
         blank=True,
         null=True,
+    )
+    status = models.CharField(
+        verbose_name='Статус группы',
+        choices=GroupStatus.choices,
     )
     coach = models.ForeignKey(
         to='user.Coach',
@@ -47,6 +51,9 @@ class Group(models.Model):
     training_time = models.CharField(
         verbose_name='Время тренировок',
         max_length=50,
+    )
+    trainings_start_date = models.DateField(
+        verbose_name='Дата начала тренировок'
     )
 
     class Meta:

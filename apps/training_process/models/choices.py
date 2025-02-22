@@ -7,3 +7,11 @@ class PlayingLevel(models.TextChoices):
     BEGINNER = ('beginner', 'Начинающий')
     PLAYER = ('player', 'Играющий')
     PRO = ('pro', 'Профессионал')
+
+
+class GroupStatus(models.TextChoices):
+    """Статусы группы."""
+
+    FUTURE = ('future', 'Будущая')
+    ACTIVE = ('active', 'Действующая')
+    FINISHED = ('finished', 'Закончившаяся')
