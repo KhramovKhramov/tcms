@@ -60,8 +60,8 @@ class Coach(models.Model):
     )
 
     class Meta:
-        verbose_name = 'тренер'
-        verbose_name_plural = 'тренеры'
+        verbose_name = 'Тренер'
+        verbose_name_plural = 'Тренеры'
 
     def __str__(self) -> str:
         return self.user.full_name

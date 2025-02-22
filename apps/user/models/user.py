@@ -60,8 +60,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(verbose_name='Активен', default=True)
 
     class Meta:
-        verbose_name = 'пользователь'
-        verbose_name_plural = 'пользователи'
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self) -> str:
         return self.full_name

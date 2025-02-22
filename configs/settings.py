@@ -34,6 +34,7 @@ INSTALLED_APPS = [
 
 INSTALLED_APPS.extend([
     "apps.user.apps.UserConfig",
+    'apps.training_process.apps.TrainingProcessConfig',
 ])
 
 

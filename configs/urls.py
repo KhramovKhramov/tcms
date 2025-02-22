@@ -8,6 +8,11 @@ from rest_framework_simplejwt.views import (
 
 api_urlpatterns = [
     path('users/', include('apps.user.urls'), name='users'),
+    path(
+        'training_process/',
+        include('apps.training_process.urls'),
+        name='training_process',
+    ),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
         'schema/swagger/',
