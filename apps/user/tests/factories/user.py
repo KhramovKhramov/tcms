@@ -5,7 +5,7 @@ from apps.user.models.choices import GenderType
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-    """Фабрика для тестов с моделью пользователя."""
+    """Фабрика данных пользователя."""
 
     last_name = factory.Faker('last_name_female', locale='ru_RU')
     first_name = factory.Faker('first_name_female', locale='ru_RU')

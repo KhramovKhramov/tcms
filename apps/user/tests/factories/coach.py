@@ -7,6 +7,8 @@ from apps.user.tests.factories.user import UserFactory
 
 
 class CoachFactory(factory.django.DjangoModelFactory):
+    """Фабрика данных тренера."""
+
     user = factory.SubFactory(UserFactory)
     date_from = timezone.now().date()
     position = CoachPosition.INSTRUCTOR

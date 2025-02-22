@@ -1,5 +1,3 @@
-from datetime import date
-
 import pytest
 from configs import settings
 from conftest import check_filters_and_ordering, get_api_url
@@ -9,7 +7,7 @@ from rest_framework import status
 from apps.user.models import Coach
 from apps.user.models.choices import CoachPosition
 from apps.user.tests.factories import CoachFactory, UserFactory
-from apps.user.tests.test_api.utils import serialize_user
+from apps.user.tests.test_api.utils import serialize_coach
 
 
 @pytest.mark.django_db
@@ -42,21 +40,7 @@ class TestCoachCRUDApi:
     def _serialize_instance_detail(instance: Coach) -> dict:
         """Сериализация объекта модели для метода retrieve()."""
 
-        return {
-            'id': instance.pk,
-            'user': serialize_user(instance.user),
-            'date_from': instance.date_from.strftime('%Y-%m-%d')
-            if isinstance(instance.date_from, date)
-            else instance.date_from,
-            'date_to': instance.date_to.strftime('%Y-%m-%d')
-            if isinstance(instance.date_to, date)
-            else instance.date_to,
-            'position': instance.position,
-            'judge_category': instance.judge_category,
-            'education': instance.education,
-            'additional_info': instance.additional_info,
-            'achievements': instance.achievements,
-        }
+        return serialize_coach(instance)
 
     def _serialize_instance_list(self, instance: Coach) -> dict:
         """Сериализация объекта модели для метода list()."""
