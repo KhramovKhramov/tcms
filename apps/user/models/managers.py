@@ -57,3 +57,20 @@ class AdministratorManager(BaseUserManager):
             using=self._db,
             hints=self._hints,
         )
+
+
+class CoachQuerySet(QuerySet, UserFullNameAnnotationMixin):
+    user_field_name = 'user'
+
+
+class CoachManager(BaseUserManager):
+    """Менеджер для модели тренера."""
+
+    use_in_migrations = True
+
+    def get_queryset(self):
+        return CoachQuerySet(
+            model=self.model,
+            using=self._db,
+            hints=self._hints,
+        )

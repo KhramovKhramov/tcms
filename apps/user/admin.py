@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.user.models import Administrator, User
+from apps.user.models import Administrator, Coach, User
 
 
 @admin.register(User)
@@ -25,4 +25,14 @@ class AdministratorModelAdmin(admin.ModelAdmin):
         'user',
         'date_from',
         'date_to',
+    )
+
+
+@admin.register(Coach)
+class CoachModelAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'date_from',
+        'date_to',
+        'position',
     )

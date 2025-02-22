@@ -4,7 +4,8 @@ from django.conf import settings
 from django.utils.timezone import now
 from rest_framework import status
 
-from apps.user.models import Administrator, User
+from apps.user.models import Administrator, Coach, User
+from apps.user.models.choices import CoachPosition
 from apps.user.tests.factories import UserFactory
 from apps.user.tests.test_api.utils import serialize_user
 
@@ -175,6 +176,9 @@ class TestUserApi:
     appoint_administrator_url = staticmethod(
         lambda pk: get_api_url('users', 'appoint-administrator', pk=pk)
     )
+    appoint_coach_url = staticmethod(
+        lambda pk: get_api_url('users', 'appoint-coach', pk=pk)
+    )
 
     def test_appoint_administrator(self, authorized_client, test_user):
         """Тест проверки назначения пользователя администратором."""
@@ -197,6 +201,49 @@ class TestUserApi:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data[0] == (
             'У пользователя уже есть действующая роль администратора'
+        )
+
+    def test_appoint_coach(self, authorized_client, test_user):
+        """Тест проверки назначения пользователя тренером."""
+
+        request_data = dict(
+            position=CoachPosition.SENIOR,
+            achievements='Кандидат в мастера спорта',
+        )
+
+        # Создаем роль тренера с дефолтными данными
+        response = authorized_client.post(self.appoint_coach_url(test_user.pk))
+        assert response.status_code == status.HTTP_200_OK
+
+        # Проверяем, что тренер создан
+        coach = Coach.objects.filter(
+            user=test_user, date_from=now().date(), date_to__isnull=True
+        ).first()
+        assert coach is not None
+
+        # Удалим роль тренера и попробуем создать новую,
+        # но с кастомными данными
+        coach.delete()
+        response = authorized_client.post(
+            self.appoint_coach_url(test_user.pk),
+            data=request_data,
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        # Проверяем, что тренер вновь создан и с нужными данными
+        coach = Coach.objects.filter(
+            user=test_user, date_from=now().date(), date_to__isnull=True
+        ).first()
+        assert coach is not None
+        assert coach.position == CoachPosition.SENIOR
+        assert coach.achievements == 'Кандидат в мастера спорта'
+
+        # Проверяем, что если у пользователя уже есть действующая роль
+        # тренера, создать еще одну нельзя
+        response = authorized_client.post(self.appoint_coach_url(test_user.pk))
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data[0] == (
+            'У пользователя уже есть действующая роль тренера'
         )
 
 

@@ -1,0 +1,56 @@
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from apps.user.api.filters.coach import CoachFilter
+from apps.user.api.serializers import CoachSerializer
+from apps.user.models import Coach
+from apps.user.services import CancelCoachService
+
+
+class CoachViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """API для работы с тренерами."""
+
+    # TODO если у пользователя несколько ролей тренера,
+    #  должна показываться только последняя
+    queryset = Coach.objects.all().order_by('-id').select_related('user')
+    serializer_class = CoachSerializer
+    filterset_class = CoachFilter
+
+    @extend_schema(
+        summary='Окончание действия роли тренера',
+        request=None,
+        responses={
+            status.HTTP_200_OK: CoachSerializer,
+        },
+        parameters=[
+            OpenApiParameter(
+                name='id',
+                type=int,
+                location=OpenApiParameter.PATH,
+                description='ID администратора',
+            ),
+        ],
+    )
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='cancel-coach',
+        url_name='cancel-coach',
+    )
+    def cancel_coach(self, request, *args, **kwargs):
+        """
+        Окончание действия роли тренера.
+
+        Если роль тренера действующая, в поле окончания действия роли
+        будет указана текущая дата, и роль перестанет быть действующей.
+        """
+
+        coach = self.get_object()
+        coach = CancelCoachService(coach).execute()
+
+        response_serializer = CoachSerializer(coach)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
