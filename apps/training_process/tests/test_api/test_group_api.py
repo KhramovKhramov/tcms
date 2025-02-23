@@ -36,6 +36,37 @@ class TestGroupCRUDApi:
 
         return prepared_instances[0]
 
+    @pytest.fixture
+    def create_request_data(self) -> dict:
+        """
+        Фикстура, возвращающая словарь с данными, необходимыми для
+        создания объекта модели.
+        """
+
+        coach = CoachFactory.create()
+        instance = self.factory.build()
+
+        return {
+            'name': instance.name,
+            'status': instance.status,
+            'coach_id': coach.pk,
+            'min_participants': instance.min_participants,
+            'max_participants': instance.max_participants,
+            'playing_level': instance.playing_level,
+            'training_days': instance.training_days,
+            'training_time': instance.training_time,
+            'trainings_start_date': instance.trainings_start_date,
+        }
+
+    @pytest.fixture
+    def update_request_data(self, create_request_data) -> dict:
+        """
+        Фикстура, возвращающая словарь с данными, необходимыми для
+        обновления объекта модели.
+        """
+
+        return create_request_data
+
     @staticmethod
     def _serialize_instance_detail(instance: Group) -> dict:
         """Сериализация объекта модели для метода retrieve()."""
@@ -67,6 +98,36 @@ class TestGroupCRUDApi:
         return [
             self._serialize_instance_list(instance) for instance in instances
         ]
+
+    def test_create(self, authorized_client, create_request_data) -> None:
+        """Тест создания."""
+
+        response = authorized_client.post(
+            self.list_url(), data=create_request_data
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+        instance = self.model.objects.get(pk=response.data['id'])
+        assert response.data == self._serialize_instance_detail(instance)
+
+    def test_update(
+        self, authorized_client, prepared_instance, update_request_data
+    ):
+        """Тест обновления."""
+
+        response = authorized_client.patch(
+            self.detail_url(prepared_instance.pk),
+            data=update_request_data,
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        prepared_instance.refresh_from_db()
+        assert response.data == self._serialize_instance_detail(
+            prepared_instance
+        )
+
+        for key, value in update_request_data.items():
+            assert getattr(prepared_instance, key) == value
 
     def test_retrieve(self, authorized_client, prepared_instance):
         """Тест получения объекта по идентификатору."""
