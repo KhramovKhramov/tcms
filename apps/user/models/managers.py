@@ -74,3 +74,20 @@ class CoachManager(BaseUserManager):
             using=self._db,
             hints=self._hints,
         )
+
+
+class AthleteQuerySet(QuerySet, UserFullNameAnnotationMixin):
+    user_field_name = 'user'
+
+
+class AthleteManager(BaseUserManager):
+    """Менеджер для модели тренера."""
+
+    use_in_migrations = True
+
+    def get_queryset(self):
+        return AthleteQuerySet(
+            model=self.model,
+            using=self._db,
+            hints=self._hints,
+        )

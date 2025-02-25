@@ -1,7 +1,7 @@
 import factory
+from common.choices import PlayingLevel
 
 from apps.training_process.models import GroupApplication
-from apps.training_process.models.choices import PlayingLevel
 from apps.training_process.tests.factories.group import GroupFactory
 from apps.user.tests.factories import UserFactory
 

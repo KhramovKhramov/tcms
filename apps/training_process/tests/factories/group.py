@@ -1,11 +1,11 @@
 from datetime import timedelta
 
 import factory
-from common.choices import Weekdays
+from common.choices import PlayingLevel, Weekdays
 from django.utils.timezone import now
 
 from apps.training_process.models import Group
-from apps.training_process.models.choices import GroupStatus, PlayingLevel
+from apps.training_process.models.choices import GroupStatus
 from apps.user.tests.factories import CoachFactory
 
 

@@ -8,7 +8,10 @@ from apps.training_process.api.serializers import (
     GroupApplicationSerializer,
 )
 from apps.training_process.models import GroupApplication
-from apps.training_process.services import GroupApplicationRejectService
+from apps.training_process.services import (
+    GroupApplicationApproveService,
+    GroupApplicationRejectService,
+)
 
 
 class GroupApplicationViewSet(viewsets.ModelViewSet):
@@ -62,6 +65,41 @@ class GroupApplicationViewSet(viewsets.ModelViewSet):
         group_application = GroupApplicationRejectService(
             group_application=group_application,
             **request_serializer.validated_data,
+        ).execute()
+
+        response_serializer = GroupApplicationSerializer(group_application)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        summary='Одобрение заявки на присоединение к группе',
+        request=None,
+        responses={
+            status.HTTP_200_OK: GroupApplicationSerializer,
+        },
+        parameters=[
+            OpenApiParameter(
+                name='id',
+                type=int,
+                location=OpenApiParameter.PATH,
+                description='ID одобряемой заявки',
+            ),
+        ],
+    )
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='approve',
+        url_name='approve',
+    )
+    def approve(self, request, *args, **kwargs):
+        """
+        Одобрение заявки на присоединение к тренировочной группе.
+        Заявка должна быть в статусе "Новая".
+        """
+
+        group_application = self.get_object()
+        group_application = GroupApplicationApproveService(
+            group_application=group_application,
         ).execute()
 
         response_serializer = GroupApplicationSerializer(group_application)

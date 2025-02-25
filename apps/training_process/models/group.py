@@ -1,9 +1,9 @@
-from common.choices import Weekdays
+from common.choices import PlayingLevel, Weekdays
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator
 from django.db import models
 
-from apps.training_process.models.choices import GroupStatus, PlayingLevel
+from apps.training_process.models.choices import GroupStatus
 
 
 class Group(models.Model):

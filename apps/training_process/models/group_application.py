@@ -1,8 +1,8 @@
+from common.choices import PlayingLevel
 from django.db import models
 
 from apps.training_process.models.choices import (
     GroupApplicationStatus,
-    PlayingLevel,
 )
 
 

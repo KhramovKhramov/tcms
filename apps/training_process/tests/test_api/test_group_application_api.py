@@ -10,6 +10,7 @@ from apps.training_process.tests.factories import (
     GroupFactory,
 )
 from apps.training_process.tests.test_api.utils import serialize_group
+from apps.user.models import Athlete
 from apps.user.tests.test_api.utils import serialize_user
 
 
@@ -200,11 +201,14 @@ class TestGroupApplicationApi:
     reject_application_url = staticmethod(
         lambda pk: get_api_url('group-applications', 'reject', pk=pk)
     )
+    approve_application_url = staticmethod(
+        lambda pk: get_api_url('group-applications', 'approve', pk=pk)
+    )
 
     def test_reject_group_application(
         self, authorized_client, test_user, training_group
     ):
-        """Тест окончания действия роли тренера."""
+        """Тест отклонения заявки на присоединение к группе."""
 
         # Создаем данные
         group_application = GroupApplicationFactory.create(
@@ -239,3 +243,46 @@ class TestGroupApplicationApi:
         assert response.data[0] == (
             'Отклонять можно только заявки в статусе "Новая"'
         )
+
+    def test_approve_group_application(
+        self, authorized_client, test_user, training_group
+    ):
+        """Тест одобрения заявки на присоединение к группе."""
+
+        # Создаем данные
+        group_application = GroupApplicationFactory.create(
+            group=training_group,
+            user=test_user,
+        )
+
+        # Одобряем заявку
+        response = authorized_client.post(
+            self.approve_application_url(group_application.pk),
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        # Проверяем, что заявка одобрена
+        group_application.refresh_from_db()
+        assert group_application.status == GroupApplicationStatus.APPROVED
+
+        # Проверяем, что создан спортсмен и присоединен к группе
+        athlete = Athlete.objects.filter(
+            user=test_user,
+            date_to__isnull=True,
+        ).first()
+
+        assert athlete is not None
+        assert training_group in athlete.groups.all()
+
+        # Отправляем запрос еще раз и проверяем, что из другого статуса заявку
+        # одобрить нельзя
+        response = authorized_client.post(
+            self.approve_application_url(group_application.pk),
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data[0] == (
+            'Одобрять можно только заявки в статусе "Новая"'
+        )
+
+        # TODO добавить проверку - если у пользователя была действующая роль
+        #  спортсмена - используется она
