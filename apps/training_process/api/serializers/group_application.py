@@ -35,3 +35,17 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupApplication
         fields = '__all__'
+        extra_kwargs = {
+            'reject_reason': {'read_only': True},
+        }
+
+
+class GroupApplicationRejectSerializer(serializers.ModelSerializer):
+    """Сериализатор отклонения заявки на присоединение к группе."""
+
+    class Meta:
+        model = GroupApplication
+        fields = ('reject_reason',)
+        extra_kwargs = {
+            'reject_reason': {'write_only': True},
+        }

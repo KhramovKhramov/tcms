@@ -41,6 +41,12 @@ class GroupApplication(models.Model):
         blank=True,
         null=True,
     )
+    reject_reason = models.CharField(
+        verbose_name='Причина отклонения заявки',
+        max_length=500,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = 'Заявка на присоединение к группе'

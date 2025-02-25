@@ -4,12 +4,22 @@ from conftest import get_api_url
 from rest_framework import status
 
 from apps.training_process.models import Group, GroupApplication
+from apps.training_process.models.choices import GroupApplicationStatus
 from apps.training_process.tests.factories import (
     GroupApplicationFactory,
     GroupFactory,
 )
 from apps.training_process.tests.test_api.utils import serialize_group
 from apps.user.tests.test_api.utils import serialize_user
+
+
+@pytest.fixture
+def training_group() -> Group:
+    """
+    Фикстура, возвращающая тренировочную группу для использования в тестах.
+    """
+
+    return GroupFactory.create()
 
 
 @pytest.mark.django_db
@@ -25,14 +35,6 @@ class TestGroupApplicationCRUDApi:
     detail_url = staticmethod(
         lambda pk: get_api_url('group-applications', 'detail', pk=pk)
     )
-
-    @pytest.fixture
-    def training_group(self) -> Group:
-        """
-        Фикстура, возвращающая тренировочную группу для использования в тестах.
-        """
-
-        return GroupFactory.create()
 
     @pytest.fixture
     def prepared_instances(self, training_group) -> list[GroupApplication]:
@@ -90,6 +92,7 @@ class TestGroupApplicationCRUDApi:
             ),
             'playing_level': instance.playing_level,
             'comment': instance.comment,
+            'reject_reason': instance.reject_reason,
         }
 
     def _serialize_instance_list(self, instance: GroupApplication) -> dict:
@@ -188,3 +191,51 @@ class TestGroupApplicationCRUDApi:
         with django_assert_max_num_queries(2):
             response = authorized_client.get(self.list_url())
             assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+class TestGroupApplicationApi:
+    """Тесты API заявок на присоединение к тренировочной группе."""
+
+    reject_application_url = staticmethod(
+        lambda pk: get_api_url('group-applications', 'reject', pk=pk)
+    )
+
+    def test_reject_group_application(
+        self, authorized_client, test_user, training_group
+    ):
+        """Тест окончания действия роли тренера."""
+
+        # Создаем данные
+        group_application = GroupApplicationFactory.create(
+            group=training_group,
+            user=test_user,
+        )
+        reject_reason = 'Потому что'
+
+        # Отклоняем заявку
+        response = authorized_client.post(
+            self.reject_application_url(group_application.pk),
+            data={
+                'reject_reason': reject_reason,
+            },
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        group_application.refresh_from_db()
+
+        assert group_application.reject_reason == reject_reason
+        assert group_application.status == GroupApplicationStatus.REJECT
+
+        # Отправляем запрос еще раз и проверяем, что из другого статуса заявку
+        # отклонить нельзя
+        response = authorized_client.post(
+            self.reject_application_url(group_application.pk),
+            data={
+                'reject_reason': reject_reason,
+            },
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data[0] == (
+            'Отклонять можно только заявки в статусе "Новая"'
+        )
