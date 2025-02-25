@@ -3,59 +3,66 @@ from configs import settings
 from conftest import get_api_url
 from rest_framework import status
 
-from apps.training_process.models import Group
-from apps.training_process.tests.factories import GroupFactory
+from apps.training_process.models import Group, GroupApplication
+from apps.training_process.tests.factories import (
+    GroupApplicationFactory,
+    GroupFactory,
+)
 from apps.training_process.tests.test_api.utils import serialize_group
-from apps.user.tests.factories import CoachFactory
+from apps.user.tests.test_api.utils import serialize_user
 
 
 @pytest.mark.django_db
-class TestGroupCRUDApi:
-    """Тесты проверки CRUD-операций API групп."""
+class TestGroupApplicationCRUDApi:
+    """
+    Тесты проверки CRUD-операций API
+    заявок на присоединение к тренировочной группе.
+    """
 
-    model = Group
-    factory = GroupFactory
-    list_url = staticmethod(lambda: get_api_url('groups', 'list'))
+    model = GroupApplication
+    factory = GroupApplicationFactory
+    list_url = staticmethod(lambda: get_api_url('group-applications', 'list'))
     detail_url = staticmethod(
-        lambda pk: get_api_url('groups', 'detail', pk=pk)
+        lambda pk: get_api_url('group-applications', 'detail', pk=pk)
     )
 
     @pytest.fixture
-    def prepared_instances(self) -> list[Group]:
+    def training_group(self) -> Group:
+        """
+        Фикстура, возвращающая тренировочную группу для использования в тестах.
+        """
+
+        return GroupFactory.create()
+
+    @pytest.fixture
+    def prepared_instances(self, training_group) -> list[GroupApplication]:
         """
         Фикстура, возвращающая список объектов
         модели для использования в тестах.
         """
 
-        coach = CoachFactory.create()
-        return self.factory.create_batch(5, coach=coach)
+        return self.factory.create_batch(5, group=training_group)
 
     @pytest.fixture
-    def prepared_instance(self, prepared_instances) -> Group:
+    def prepared_instance(self, prepared_instances) -> GroupApplication:
         """Фикстура, возвращающая объект модели для использования в тестах."""
 
         return prepared_instances[0]
 
     @pytest.fixture
-    def create_request_data(self) -> dict:
+    def create_request_data(self, training_group, test_user) -> dict:
         """
         Фикстура, возвращающая словарь с данными, необходимыми для
         создания объекта модели.
         """
 
-        coach = CoachFactory.create()
         instance = self.factory.build()
 
         return {
-            'name': instance.name,
-            'status': instance.status,
-            'coach_id': coach.pk,
-            'min_participants': instance.min_participants,
-            'max_participants': instance.max_participants,
+            'group_id': training_group.pk,
+            'user_id': test_user.pk,
             'playing_level': instance.playing_level,
-            'training_days': instance.training_days,
-            'training_time': instance.training_time,
-            'trainings_start_date': instance.trainings_start_date,
+            'comment': instance.comment,
         }
 
     @pytest.fixture
@@ -65,20 +72,32 @@ class TestGroupCRUDApi:
         обновления объекта модели.
         """
 
-        return create_request_data
+        update_fields = ['playing_level', 'comment']
+
+        return {key: create_request_data[key] for key in update_fields}
 
     @staticmethod
-    def _serialize_instance_detail(instance: Group) -> dict:
+    def _serialize_instance_detail(instance: GroupApplication) -> dict:
         """Сериализация объекта модели для метода retrieve()."""
 
-        return serialize_group(instance)
+        return {
+            'id': instance.pk,
+            'user': serialize_user(instance.user),
+            'group': serialize_group(instance.group),
+            'status': instance.status,
+            'created_at': instance.created_at.isoformat().replace(
+                '+00:00', 'Z'
+            ),
+            'playing_level': instance.playing_level,
+            'comment': instance.comment,
+        }
 
-    def _serialize_instance_list(self, instance: Group) -> dict:
+    def _serialize_instance_list(self, instance: GroupApplication) -> dict:
         """Сериализация объекта модели для метода list()."""
 
         return self._serialize_instance_detail(instance)
 
-    def _serialize_list(self, instances: list[Group]) -> list[dict]:
+    def _serialize_list(self, instances: list[GroupApplication]) -> list[dict]:
         """Сериализация списка объектов модели для метода list()."""
 
         return [
@@ -115,6 +134,16 @@ class TestGroupCRUDApi:
         for key, value in update_request_data.items():
             assert getattr(prepared_instance, key) == value
 
+    def test_delete(self, authorized_client, prepared_instance):
+        """Тест удаления."""
+
+        response = authorized_client.delete(
+            self.detail_url(prepared_instance.pk)
+        )
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+
+        assert not self.model.objects.filter(pk=prepared_instance.pk).exists()
+
     def test_retrieve(self, authorized_client, prepared_instance):
         """Тест получения объекта по идентификатору."""
 
@@ -125,7 +154,7 @@ class TestGroupCRUDApi:
             prepared_instance
         )
 
-    def test_list(self, authorized_client, prepared_instances):
+    def test_list(self, authorized_client, prepared_instances, test_user):
         """Тест получения списка объектов."""
 
         response = authorized_client.get(self.list_url())
@@ -138,8 +167,7 @@ class TestGroupCRUDApi:
     def test_pagination(self, authorized_client):
         """Тест пагинации."""
 
-        coach = CoachFactory.create()
-        self.factory.create_batch(30, coach=coach)
+        self.factory.create_batch(30)
 
         response = authorized_client.get(self.list_url())
         assert response.status_code == status.HTTP_200_OK
