@@ -1,10 +1,11 @@
 import pytest
+from common.choices import PlayingLevel
 from conftest import check_filters_and_ordering, get_api_url
 from django.conf import settings
 from django.utils.timezone import now
 from rest_framework import status
 
-from apps.user.models import Administrator, Coach, User
+from apps.user.models import Administrator, Athlete, Coach, User
 from apps.user.models.choices import CoachPosition
 from apps.user.tests.factories import UserFactory
 from apps.user.tests.test_api.utils import serialize_user
@@ -179,6 +180,9 @@ class TestUserApi:
     appoint_coach_url = staticmethod(
         lambda pk: get_api_url('users', 'appoint-coach', pk=pk)
     )
+    appoint_athlete_url = staticmethod(
+        lambda pk: get_api_url('users', 'appoint-athlete', pk=pk)
+    )
 
     def test_appoint_administrator(self, authorized_client, test_user):
         """Тест проверки назначения пользователя администратором."""
@@ -244,6 +248,36 @@ class TestUserApi:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data[0] == (
             'У пользователя уже есть действующая роль тренера'
+        )
+
+    def test_appoint_athlete(self, authorized_client, test_user):
+        """Тест проверки назначения пользователя спортсменом."""
+
+        request_data = dict(playing_level=PlayingLevel.PLAYER)
+
+        # Создаем роль спортсмена
+        response = authorized_client.post(
+            self.appoint_athlete_url(test_user.pk),
+            data=request_data,
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        # Проверяем, что спортсмен создан и с нужными данными
+        athlete = Athlete.objects.filter(
+            user=test_user, date_from=now().date(), date_to__isnull=True
+        ).first()
+        assert athlete is not None
+        assert athlete.playing_level == request_data['playing_level']
+
+        # Проверяем, что если у пользователя уже есть действующая роль
+        # спортсмена, создать еще одну нельзя
+        response = authorized_client.post(
+            self.appoint_athlete_url(test_user.pk),
+            data=request_data,
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data[0] == (
+            'У пользователя уже есть действующая роль спортсмена'
         )
 
 

@@ -3,4 +3,5 @@ from .appoint_administrator import UserAppointAdministratorService
 from .appoint_athlete import UserAppointAthleteService
 from .appoint_coach import UserAppointCoachService
 from .cancel_administrator import CancelAdministratorService
+from .cancel_athlete import CancelAthleteService
 from .cancel_coach import CancelCoachService

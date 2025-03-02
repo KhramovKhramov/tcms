@@ -11,7 +11,7 @@ class GroupApplicationApproveService:
 
     def __init__(self, group_application: GroupApplication) -> None:
         """
-        :param group_application: Пользователь.
+        :param group_application: Заявка на присоединение к группе.
         """
 
         self._application = group_application
@@ -39,6 +39,7 @@ class GroupApplicationApproveService:
         """Присоединение спортсмена к группе."""
 
         # Если у пользователя нет действующей роли спортсмена, она создается
+        # TODO если у спортсмена была действующая роль, надо менять ей level
         athlete = (
             Athlete.objects.filter(
                 user=self._application.user, date_to__isnull=True

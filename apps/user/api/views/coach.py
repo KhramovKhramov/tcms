@@ -3,7 +3,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.user.api.filters.coach import CoachFilter
+from apps.user.api.filters import CoachFilter
 from apps.user.api.serializers import CoachSerializer
 from apps.user.models import Coach
 from apps.user.services import CancelCoachService
@@ -31,7 +31,7 @@ class CoachViewSet(
                 name='id',
                 type=int,
                 location=OpenApiParameter.PATH,
-                description='ID администратора',
+                description='ID тренера',
             ),
         ],
     )

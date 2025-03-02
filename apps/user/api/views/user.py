@@ -6,13 +6,16 @@ from rest_framework.response import Response
 from apps.user.api.filters import UserFilter
 from apps.user.api.serializers import (
     AdministratorSerializer,
+    AppointAthleteSerializer,
     AppointCoachSerializer,
+    AthleteSerializer,
     CoachSerializer,
     UserSerializer,
 )
 from apps.user.models import User
 from apps.user.services import (
     UserAppointAdministratorService,
+    UserAppointAthleteService,
     UserAppointCoachService,
 )
 
@@ -27,6 +30,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'appoint_coach':
             return AppointCoachSerializer
+        if self.action == 'appoint_athlete':
+            return AppointAthleteSerializer
         return super().get_serializer_class()
 
     filterset_class = UserFilter
@@ -108,4 +113,45 @@ class UserViewSet(viewsets.ModelViewSet):
         ).execute()
 
         response_serializer = CoachSerializer(coach)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        summary='Назначение пользователю роли спортсмена',
+        request=AppointAthleteSerializer(),
+        responses={
+            status.HTTP_200_OK: AthleteSerializer,
+        },
+        parameters=[
+            OpenApiParameter(
+                name='id',
+                type=int,
+                location=OpenApiParameter.PATH,
+                description='ID пользователя, которому'
+                'назначается роль спортсмена',
+            ),
+        ],
+    )
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='appoint-athlete',
+        url_name='appoint-athlete',
+    )
+    def appoint_athlete(self, request, *args, **kwargs):
+        """
+        Назначение пользователю роли спортсмена.
+
+        У пользователя не должно быть действующей роли спортсмена, иначе
+        будет ошибка. Если действующей роли нет, будет создана запись в
+        таблице спортсменов с привязанным пользователем.
+        """
+
+        user = self.get_object()
+        request_serializer = self.get_serializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+        athlete = UserAppointAthleteService(
+            user=user, **request_serializer.validated_data
+        ).execute()
+
+        response_serializer = AthleteSerializer(athlete)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
