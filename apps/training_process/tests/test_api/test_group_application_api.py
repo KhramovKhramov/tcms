@@ -24,6 +24,20 @@ def training_group() -> Group:
     return GroupFactory.create()
 
 
+@pytest.fixture
+def approved_application(training_group, test_user) -> GroupApplication:
+    """
+    Фикстура, возвращающая одобренную заявку на присоединение к группе
+    для использования в тестах.
+    """
+
+    return GroupApplicationFactory.create(
+        group=training_group,
+        user=test_user,
+        status=GroupApplicationStatus.APPROVED,
+    )
+
+
 @pytest.mark.django_db
 class TestGroupApplicationCRUDApi:
     """
@@ -121,7 +135,11 @@ class TestGroupApplicationCRUDApi:
         assert response.data == self._serialize_instance_detail(instance)
 
     def test_update(
-        self, authorized_client, prepared_instance, update_request_data
+        self,
+        authorized_client,
+        prepared_instance,
+        update_request_data,
+        approved_application,
     ):
         """Тест обновления."""
 
@@ -139,7 +157,20 @@ class TestGroupApplicationCRUDApi:
         for key, value in update_request_data.items():
             assert getattr(prepared_instance, key) == value
 
-    def test_delete(self, authorized_client, prepared_instance):
+        # Проверяем, что нельзя редактировать заявку не в статусе "Новая"
+        response = authorized_client.patch(
+            self.detail_url(approved_application.pk),
+            data=update_request_data,
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            response.data[0]
+            == 'Редактировать можно только заявки в статусе "Новая"'
+        )
+
+    def test_delete(
+        self, authorized_client, prepared_instance, approved_application
+    ):
         """Тест удаления."""
 
         response = authorized_client.delete(
@@ -148,6 +179,16 @@ class TestGroupApplicationCRUDApi:
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         assert not self.model.objects.filter(pk=prepared_instance.pk).exists()
+
+        # Проверяем, что нельзя удалить заявку не в статусе "Новая"
+        response = authorized_client.delete(
+            self.detail_url(approved_application.pk)
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            response.data[0] == 'Удалять можно только заявки в статусе "Новая"'
+        )
+        assert self.model.objects.filter(pk=approved_application.pk).exists()
 
     def test_retrieve(self, authorized_client, prepared_instance):
         """Тест получения объекта по идентификатору."""

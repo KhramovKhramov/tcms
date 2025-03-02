@@ -40,6 +40,18 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
         }
 
 
+class GroupApplicationUpdateSerializer(serializers.ModelSerializer):
+    """Сериализатор редактирования заявки на присоединение к группе."""
+
+    class Meta:
+        model = GroupApplication
+        fields = ('playing_level', 'comment')
+        extra_kwargs = {
+            'playing_level': {'write_only': True, 'required': False},
+            'comment': {'write_only': True, 'required': False},
+        }
+
+
 class GroupApplicationRejectSerializer(serializers.ModelSerializer):
     """Сериализатор отклонения заявки на присоединение к группе."""
 

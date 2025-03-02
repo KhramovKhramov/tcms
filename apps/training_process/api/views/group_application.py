@@ -1,14 +1,17 @@
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from apps.training_process.api.filters import GroupApplicationFilter
 from apps.training_process.api.serializers import (
     GroupApplicationRejectSerializer,
     GroupApplicationSerializer,
+    GroupApplicationUpdateSerializer,
 )
 from apps.training_process.models import GroupApplication
+from apps.training_process.models.choices import GroupApplicationStatus
 from apps.training_process.services import (
     GroupApplicationApproveService,
     GroupApplicationRejectService,
@@ -32,7 +35,49 @@ class GroupApplicationViewSet(viewsets.ModelViewSet):
             return GroupApplicationRejectSerializer
         return super().get_serializer_class()
 
-    # TODO редактировать/удалять заявки можно только в статусе Новая
+    def destroy(self, request, *args, **kwargs):
+        """
+        Удаление заявки на присоединение к группе.
+
+        Удалять можно только заявки в статусе "Новая".
+        """
+
+        group_application = self.get_object()
+        if not group_application.status == GroupApplicationStatus.NEW:
+            raise ValidationError(
+                'Удалять можно только заявки в статусе "Новая"'
+            )
+
+        self.perform_destroy(group_application)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Редактирование заявки на присоединение к группе.
+
+        Редактировать можно только заявки в статусе "Новая".
+        """
+
+        group_application = self.get_object()
+
+        # Проверяем, что заявка находится в статусе "Новая"
+        if not group_application.status == GroupApplicationStatus.NEW:
+            raise ValidationError(
+                'Редактировать можно только заявки в статусе "Новая"'
+            )
+
+        request_serializer = GroupApplicationUpdateSerializer(
+            group_application,
+            data=request.data,
+            partial=True,
+        )
+        request_serializer.is_valid(raise_exception=True)
+        self.perform_update(request_serializer)
+
+        response_serializer = self.get_serializer(group_application)
+
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         summary='Отклонение заявки на присоединение к группе',
