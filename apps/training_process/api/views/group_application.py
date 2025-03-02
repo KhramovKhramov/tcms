@@ -3,6 +3,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.training_process.api.filters import GroupApplicationFilter
 from apps.training_process.api.serializers import (
     GroupApplicationRejectSerializer,
     GroupApplicationSerializer,
@@ -23,6 +24,7 @@ class GroupApplicationViewSet(viewsets.ModelViewSet):
         .order_by('-id')
     )
     serializer_class = GroupApplicationSerializer
+    filterset_class = GroupApplicationFilter
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):

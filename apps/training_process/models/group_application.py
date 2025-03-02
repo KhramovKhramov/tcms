@@ -4,10 +4,13 @@ from django.db import models
 from apps.training_process.models.choices import (
     GroupApplicationStatus,
 )
+from apps.training_process.models.managers import GroupApplicationManager
 
 
 class GroupApplication(models.Model):
     """Модель заявки на присоединение к тренировочной группе."""
+
+    objects = GroupApplicationManager()
 
     user = models.ForeignKey(
         to='user.User',

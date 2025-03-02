@@ -1,6 +1,6 @@
 import pytest
 from configs import settings
-from conftest import get_api_url
+from conftest import check_filters_and_ordering, get_api_url
 from rest_framework import status
 
 from apps.training_process.models import Group, GroupApplication
@@ -11,6 +11,7 @@ from apps.training_process.tests.factories import (
 )
 from apps.training_process.tests.test_api.utils import serialize_group
 from apps.user.models import Athlete
+from apps.user.tests.factories import CoachFactory, UserFactory
 from apps.user.tests.test_api.utils import serialize_user
 
 
@@ -286,3 +287,110 @@ class TestGroupApplicationApi:
 
         # TODO добавить проверку - если у пользователя была действующая роль
         #  спортсмена - используется она
+
+
+@pytest.mark.django_db
+class TestTestGroupApplicationFilters:
+    """Тесты фильтров и сортировки заявок на присоединение к группе."""
+
+    list_url = staticmethod(lambda: get_api_url('group-applications', 'list'))
+
+    @pytest.fixture
+    def prepared_data(self, test_user) -> list[GroupApplication]:
+        """
+        Фикстура, возвращающая тестовые данные
+        для проверки фильтрации и сортировки.
+        """
+
+        # Данные пользователей
+        user_data = [
+            {
+                'id': 99,
+                'last_name': 'Кривоногова',
+                'first_name': 'Алевтина',
+                'patronymic': 'Васильевна',
+            },
+            {
+                'last_name': 'Иванов',
+                'first_name': 'Иван',
+                'patronymic': 'Иванович',
+            },
+            {
+                'last_name': 'Большакова',
+                'first_name': 'Кристина',
+                'patronymic': 'Сергеевна',
+            },
+        ]
+
+        # Создание пользователей
+        users = [UserFactory.create(**data) for data in user_data]
+
+        # Создание групп для подачи заявок
+        coach = CoachFactory.create(user=test_user)
+        group1 = GroupFactory.create(id=99, coach=coach)
+        group2 = GroupFactory.create(coach=coach)
+
+        # Создаем и возвращаем администраторов для тестов
+        return [
+            GroupApplicationFactory.create(
+                user=users[0],
+                group=group1,
+            ),
+            GroupApplicationFactory.create(
+                user=users[1],
+                group=group1,
+            ),
+            GroupApplicationFactory.create(
+                user=users[2],
+                group=group2,
+            ),
+        ]
+
+    @pytest.mark.parametrize(
+        ('filter_param', 'expected_objects'),
+        [
+            ({'full_name': 'ив'}, [1, 0]),
+            ({'full_name': 'Крис'}, [2]),
+            ({'user_id': 99}, [0]),
+            ({'group_id': 99}, [1, 0]),
+        ],
+    )
+    def test_filters(
+        self, authorized_client, prepared_data, filter_param, expected_objects
+    ):
+        """Тесты фильтрации."""
+
+        check_filters_and_ordering(
+            self.list_url(),
+            authorized_client,
+            prepared_data,
+            filter_param,
+            expected_objects,
+        )
+
+    @pytest.mark.parametrize(
+        ('ordering_param', 'expected_objects'),
+        [
+            ({'ordering': ''}, [2, 1, 0]),
+            ({'ordering': 'full_name'}, [2, 1, 0]),
+            ({'ordering': '-full_name'}, [0, 1, 2]),
+            ({'ordering': 'created_at'}, [0, 1, 2]),
+            ({'ordering': '-created_at'}, [2, 1, 0]),
+        ],
+    )
+    def test_ordering(
+        self,
+        authorized_client,
+        prepared_data,
+        ordering_param,
+        expected_objects,
+    ):
+        """Тесты сортировки."""
+
+        check_filters_and_ordering(
+            self.list_url(),
+            authorized_client,
+            prepared_data,
+            ordering_param,
+            expected_objects,
+        )
