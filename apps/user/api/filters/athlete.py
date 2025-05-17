@@ -1,6 +1,8 @@
 from django_filters import rest_framework as filters
 from django_filters.constants import EMPTY_VALUES
 
+from common.mixins import FullNameFilterMixin
+
 
 class AthleteOrderingFilter(filters.OrderingFilter):
     """
@@ -21,21 +23,8 @@ class AthleteOrderingFilter(filters.OrderingFilter):
         return qs.with_full_name_annotation().order_by(*ordering)
 
 
-class AthleteFilter(filters.FilterSet):
+class AthleteFilter(FullNameFilterMixin):
     """Фильтрация и сортировка спортсменов."""
-
-    # TODO добавить всем ролям фильтры
-    # Фильтры
-    full_name = filters.CharFilter(
-        label='ФИО пользователя', method='full_name_filter'
-    )
-
-    def full_name_filter(self, qs, name, value):
-        """Фильтрация по ФИО пользователя."""
-
-        return qs.with_full_name_annotation().filter(
-            full_name__icontains=value,
-        )
 
     # Сортировка
     ordering = AthleteOrderingFilter(

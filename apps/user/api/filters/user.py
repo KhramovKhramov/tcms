@@ -1,6 +1,8 @@
 from django_filters import rest_framework as filters
 from django_filters.constants import EMPTY_VALUES
 
+from common.mixins import FullNameFilterMixin
+
 
 class UserOrderingFilter(filters.OrderingFilter):
     """
@@ -21,22 +23,12 @@ class UserOrderingFilter(filters.OrderingFilter):
         return qs.with_full_name_annotation().order_by(*ordering)
 
 
-class UserFilter(filters.FilterSet):
+class UserFilter(FullNameFilterMixin):
     """Фильтрация и сортировка пользователей."""
 
     # Фильтры
-    full_name = filters.CharFilter(
-        label='ФИО пользователя', method='full_name_filter'
-    )
     email = filters.CharFilter(label='Email', lookup_expr='icontains')
     phone = filters.CharFilter(label='Номер телефона', lookup_expr='icontains')
-
-    def full_name_filter(self, qs, name, value):
-        """Фильтрация по ФИО пользователя."""
-
-        return qs.with_full_name_annotation().filter(
-            full_name__icontains=value,
-        )
 
     # Сортировка
     ordering = UserOrderingFilter(
