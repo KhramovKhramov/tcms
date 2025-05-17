@@ -1,7 +1,6 @@
+from common.mixins import FullNameFilterMixin
 from django_filters import rest_framework as filters
 from django_filters.constants import EMPTY_VALUES
-
-from common.mixins import FullNameFilterMixin
 
 
 class AthleteOrderingFilter(filters.OrderingFilter):
@@ -25,6 +24,11 @@ class AthleteOrderingFilter(filters.OrderingFilter):
 
 class AthleteFilter(FullNameFilterMixin):
     """Фильтрация и сортировка спортсменов."""
+
+    # Фильтры
+    group_id = filters.NumberFilter(
+        label='Группа', field_name='groups__id', lookup_expr='exact'
+    )
 
     # Сортировка
     ordering = AthleteOrderingFilter(

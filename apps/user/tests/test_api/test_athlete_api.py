@@ -6,6 +6,7 @@ from conftest import check_filters_and_ordering, get_api_url
 from django.utils.timezone import now
 from rest_framework import status
 
+from apps.training_process.tests.factories import GroupFactory
 from apps.user.models import Athlete
 from apps.user.tests.factories import AthleteFactory, UserFactory
 from apps.user.tests.test_api.utils import serialize_user
@@ -149,7 +150,7 @@ class TestAthleteFilters:
     list_url = staticmethod(lambda: get_api_url('athletes', 'list'))
 
     @pytest.fixture
-    def prepared_data(self) -> list[Athlete]:
+    def prepared_data(self, test_user) -> list[Athlete]:
         """
         Фикстура, возвращающая тестовые данные
         для проверки фильтрации и сортировки.
@@ -177,19 +178,26 @@ class TestAthleteFilters:
         # Создание пользователей
         users = [UserFactory.create(**data) for data in user_data]
 
-        # Создаем и возвращаем администраторов для тестов
-        return [
+        # Создание группы для тестирования фильтрации по группам
+        group = GroupFactory.create(id=99, coach__user=test_user)
+
+        # Создаем и возвращаем спортсменов для тестов
+        athletes = [
             AthleteFactory.create(
                 user=user,
             )
             for user in users
         ]
+        athletes[0].groups.add(group)
+
+        return athletes
 
     @pytest.mark.parametrize(
         ('filter_param', 'expected_objects'),
         [
             ({'full_name': 'ив'}, [1, 0]),
             ({'full_name': 'Крис'}, [2]),
+            ({'group_id': 99}, [0]),
         ],
     )
     def test_filters(

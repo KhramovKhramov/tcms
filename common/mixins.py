@@ -1,5 +1,6 @@
 from django_filters import rest_framework as filters
 
+
 class FullNameFilterMixin(filters.FilterSet):
     """Добавляет к классу с фильтрами фильтр по ФИО пользователя."""
 
