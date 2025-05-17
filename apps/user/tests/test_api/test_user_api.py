@@ -33,7 +33,7 @@ class TestUserCRUDApi:
     def prepared_instance(self, prepared_instances) -> User:
         """Фикстура, возвращающая объект модели для использования в тестах."""
 
-        return prepared_instances[0]
+        return self.factory.create()
 
     @pytest.fixture
     def create_request_data(self) -> dict:

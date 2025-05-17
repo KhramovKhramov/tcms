@@ -35,7 +35,8 @@ class TestAthleteCRUDApi:
     def prepared_instance(self, prepared_instances) -> Athlete:
         """Фикстура, возвращающая объект модели для использования в тестах."""
 
-        return prepared_instances[0]
+
+        return self.factory.create()
 
     @staticmethod
     def _serialize_instance_detail(instance: Athlete) -> dict:
