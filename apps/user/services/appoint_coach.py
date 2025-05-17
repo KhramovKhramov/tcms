@@ -23,12 +23,12 @@ class UserAppointCoachService:
 
         return self._create_coach()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Валидация."""
 
         self._validate_coach_already_exists()
 
-    def _validate_coach_already_exists(self):
+    def _validate_coach_already_exists(self) -> None:
         """
         Проверка на существование у пользователя
         действующей роли тренера.

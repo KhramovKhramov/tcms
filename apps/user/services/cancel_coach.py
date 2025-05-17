@@ -5,7 +5,13 @@ from apps.user.models import Coach
 
 
 class CancelCoachService:
-    def __init__(self, coach: Coach):
+    """Сервис окончания действия роли тренера."""
+
+    def __init__(self, coach: Coach) -> None:
+        """
+        :param coach: Тренер.
+        """
+
         self._coach = coach
 
     def execute(self) -> Coach:
@@ -13,14 +19,14 @@ class CancelCoachService:
 
         return self._cancel_coach()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Валидация."""
 
         self._validate_cancelled_coach()
         # TODO добавить проверку - если есть действующие группы,
         #  надо сначала заменить в них тренера
 
-    def _validate_cancelled_coach(self):
+    def _validate_cancelled_coach(self) -> None:
         """Проверка, точно ли роль тренера - действующая."""
 
         if self._coach.date_to is not None:

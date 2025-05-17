@@ -5,7 +5,13 @@ from apps.user.models import Administrator, User
 
 
 class UserAppointAdministratorService:
-    def __init__(self, user: User):
+    """Сервис назначения пользователю роли администратора."""
+
+    def __init__(self, user: User) -> None:
+        """
+        :param user: Пользователь.
+        """
+
         self._user = user
 
     def execute(self) -> Administrator:
@@ -13,12 +19,12 @@ class UserAppointAdministratorService:
 
         return self._create_administrator()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Валидация."""
 
         self._validate_administrator_already_exists()
 
-    def _validate_administrator_already_exists(self):
+    def _validate_administrator_already_exists(self) -> None:
         """
         Проверка на существование у пользователя
         действующей роли администратора.

@@ -5,7 +5,13 @@ from apps.user.models import Athlete
 
 
 class CancelAthleteService:
-    def __init__(self, athlete: Athlete):
+    """Сервис окончания действия роли спортсмена."""
+
+    def __init__(self, athlete: Athlete) -> None:
+        """
+        :param athlete: Администратор.
+        """
+
         self._athlete = athlete
 
     def execute(self) -> Athlete:
@@ -13,12 +19,12 @@ class CancelAthleteService:
 
         return self._cancel_athlete()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Валидация."""
 
         self._validate_cancelled__athlete()
 
-    def _validate_cancelled__athlete(self):
+    def _validate_cancelled__athlete(self) -> Athlete:
         """Проверка, точно ли роль спортсмена - действующая."""
 
         if self._athlete.date_to is not None:

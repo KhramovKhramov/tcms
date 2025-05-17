@@ -5,7 +5,13 @@ from apps.user.models import Administrator
 
 
 class CancelAdministratorService:
-    def __init__(self, administrator: Administrator):
+    """Сервис окончания действия роли администратора."""
+
+    def __init__(self, administrator: Administrator) -> None:
+        """
+        :param administrator: Администратор.
+        """
+
         self._administrator = administrator
 
     def execute(self) -> Administrator:
@@ -13,12 +19,12 @@ class CancelAdministratorService:
 
         return self._cancel_administrator()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Валидация."""
 
         self._validate_cancelled_administrator()
 
-    def _validate_cancelled_administrator(self):
+    def _validate_cancelled_administrator(self) -> None:
         """Проверка, точно ли роль администратора - действующая."""
 
         if self._administrator.date_to is not None:

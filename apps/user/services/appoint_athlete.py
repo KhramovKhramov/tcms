@@ -22,12 +22,12 @@ class UserAppointAthleteService:
 
         return self._create_athlete()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Валидация."""
 
         self._validate_athlete_already_exists()
 
-    def _validate_athlete_already_exists(self):
+    def _validate_athlete_already_exists(self) -> None:
         """
         Проверка на существование у пользователя
         действующей роли спортсмена.
