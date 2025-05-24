@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from apps.user.models import Administrator
 
 
-class CancelAdministratorService:
+class AdministratorCancelService:
     """Сервис окончания действия роли администратора."""
 
     def __init__(self, administrator: Administrator) -> None:

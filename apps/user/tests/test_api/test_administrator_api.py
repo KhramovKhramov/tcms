@@ -28,9 +28,29 @@ class TestAdministratorCRUDApi:
 
         return self.factory.create_batch(5)
 
+    @pytest.fixture
+    def create_request_data(self) -> dict:
+        """
+        Фикстура, возвращающая словарь с данными, необходимыми для
+        создания объекта модели.
+        """
+
+        instance = UserFactory.build()
+
+        return {
+            'user_data': {
+                'email': instance.email,
+                'first_name': instance.first_name,
+                'last_name': instance.last_name,
+                'date_of_birth': instance.date_of_birth,
+                'gender': instance.gender,
+                'phone': instance.phone,
+            }
+        }
+
     @staticmethod
-    def _serialize_instance_list(instance: Administrator) -> dict:
-        """Сериализация объекта модели для метода list()."""
+    def _serialize_instance_detail(instance: Administrator) -> dict:
+        """Сериализация объекта модели для метода retrieve()."""
 
         return {
             'id': instance.pk,
@@ -43,12 +63,30 @@ class TestAdministratorCRUDApi:
             else instance.date_to,
         }
 
+    def _serialize_instance_list(self, instance: Administrator) -> dict:
+        """Сериализация объекта модели для метода list()."""
+
+        return self._serialize_instance_detail(instance)
+
     def _serialize_list(self, instances: list[Administrator]) -> list[dict]:
         """Сериализация списка объектов модели для метода list()."""
 
         return [
             self._serialize_instance_list(instance) for instance in instances
         ]
+
+    def test_create(self, authorized_client, create_request_data) -> None:
+        """Тест создания администратора вместе с пользователем."""
+
+        response = authorized_client.post(
+            self.list_url(),
+            data=create_request_data,
+            format='json',
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+        instance = self.model.objects.get(pk=response.data['id'])
+        assert response.data == self._serialize_instance_detail(instance)
 
     def test_list(self, authorized_client, prepared_instances):
         """Тест получения списка объектов."""

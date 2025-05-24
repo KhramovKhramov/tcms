@@ -4,12 +4,20 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.user.api.filters import AdministratorFilter
-from apps.user.api.serializers import AdministratorSerializer
+from apps.user.api.serializers import (
+    AdministratorCreateSerializer,
+    AdministratorSerializer,
+)
 from apps.user.models import Administrator
-from apps.user.services import CancelAdministratorService
+from apps.user.services import (
+    AdministratorCancelService,
+    AdministratorWithUserCreateService,
+)
 
 
-class AdministratorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class AdministratorViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
+):
     """API для работы с администраторами."""
 
     # TODO если у пользователя несколько ролей администратора,
@@ -18,6 +26,12 @@ class AdministratorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         Administrator.objects.all().order_by('-id').select_related('user')
     )
     serializer_class = AdministratorSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return AdministratorCreateSerializer
+        return super().get_serializer_class()
+
     filterset_class = AdministratorFilter
 
     @extend_schema(
@@ -50,7 +64,31 @@ class AdministratorViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         """
 
         administrator = self.get_object()
-        administrator = CancelAdministratorService(administrator).execute()
+        administrator = AdministratorCancelService(administrator).execute()
 
         response_serializer = AdministratorSerializer(administrator)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        summary='Создание роли администратора вместе с пользователем',
+        request=AdministratorCreateSerializer,
+        responses={
+            status.HTTP_201_CREATED: AdministratorSerializer,
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        """
+        Создание роли администратора вместе с созданием нового для системы
+        пользователя.
+        """
+
+        request_serializer = self.get_serializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+        administrator = AdministratorWithUserCreateService(
+            **request_serializer.validated_data
+        ).execute()
+
+        response_serializer = AdministratorSerializer(administrator)
+        return Response(
+            response_serializer.data, status=status.HTTP_201_CREATED
+        )

@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from apps.user.api.serializers.user import UserSerializer
+from apps.user.api.serializers.user import (
+    UserCreateNestedSerializer,
+    UserSerializer,
+)
 from apps.user.models import Administrator, User
 
 
@@ -21,3 +24,12 @@ class AdministratorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Administrator
         fields = '__all__'
+
+
+class AdministratorCreateSerializer(serializers.Serializer):
+    """Сериализатор создания роли администратора вместе с пользователем."""
+
+    user_data = UserCreateNestedSerializer(
+        label='Данные пользователя',
+        write_only=True,
+    )

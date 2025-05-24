@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from apps.user.api.filters import AthleteFilter
 from apps.user.api.serializers import AthleteSerializer
 from apps.user.models import Athlete
-from apps.user.services import CancelAthleteService
+from apps.user.services import AthleteCancelService
 
 
 class AthleteViewSet(
@@ -50,7 +50,7 @@ class AthleteViewSet(
         """
 
         athlete = self.get_object()
-        athlete = CancelAthleteService(athlete).execute()
+        athlete = AthleteCancelService(athlete).execute()
 
         response_serializer = AthleteSerializer(athlete)
         return Response(response_serializer.data, status=status.HTTP_200_OK)

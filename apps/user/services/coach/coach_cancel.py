@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from apps.user.models import Coach
 
 
-class CancelCoachService:
+class CoachCancelService:
     """Сервис окончания действия роли тренера."""
 
     def __init__(self, coach: Coach) -> None:

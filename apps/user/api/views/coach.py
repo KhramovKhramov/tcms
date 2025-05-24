@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from apps.user.api.filters import CoachFilter
 from apps.user.api.serializers import CoachSerializer
 from apps.user.models import Coach
-from apps.user.services import CancelCoachService
+from apps.user.services import CoachCancelService
 
 
 class CoachViewSet(
@@ -50,7 +50,7 @@ class CoachViewSet(
         """
 
         coach = self.get_object()
-        coach = CancelCoachService(coach).execute()
+        coach = CoachCancelService(coach).execute()
 
         response_serializer = CoachSerializer(coach)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
