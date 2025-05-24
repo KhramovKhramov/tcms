@@ -1,18 +1,15 @@
 from rest_framework import serializers
 
-from apps.user.api.serializers.user import UserSerializer
-from apps.user.models import Athlete, User
+from apps.user.api.serializers.user import (
+    UserCreateNestedSerializer,
+    UserSerializer,
+)
+from apps.user.models import Athlete
 
 
 class AthleteSerializer(serializers.ModelSerializer):
     """Сериализатор данных спортсмена."""
 
-    user_id = serializers.PrimaryKeyRelatedField(
-        label='Идентификатор пользователя',
-        queryset=User.objects.all(),
-        source='user',
-        write_only=True,
-    )
     user = UserSerializer(
         label='Пользователь',
         read_only=True,
@@ -23,7 +20,6 @@ class AthleteSerializer(serializers.ModelSerializer):
         # TODO возможно, стоит добавить группы для retrieve()
         fields = (
             'id',
-            'user_id',
             'user',
             'date_from',
             'date_to',
@@ -37,6 +33,22 @@ class AppointAthleteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Athlete
         fields = ('playing_level',)
+        extra_kwargs = {
+            'playing_level': {'write_only': True},
+        }
+
+
+class AthleteCreateSerializer(serializers.ModelSerializer):
+    """Сериализатор создания роли спортсмена вместе с пользователем."""
+
+    user_data = UserCreateNestedSerializer(
+        label='Данные пользователя',
+        write_only=True,
+    )
+
+    class Meta:
+        model = Athlete
+        fields = ('user_data', 'playing_level')
         extra_kwargs = {
             'playing_level': {'write_only': True},
         }

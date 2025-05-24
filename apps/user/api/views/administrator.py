@@ -25,6 +25,7 @@ class AdministratorViewSet(
     queryset = (
         Administrator.objects.all().order_by('-id').select_related('user')
     )
+
     serializer_class = AdministratorSerializer
 
     def get_serializer_class(self):
@@ -33,6 +34,30 @@ class AdministratorViewSet(
         return super().get_serializer_class()
 
     filterset_class = AdministratorFilter
+
+    @extend_schema(
+        summary='Создание роли администратора вместе с пользователем',
+        request=AdministratorCreateSerializer,
+        responses={
+            status.HTTP_201_CREATED: AdministratorSerializer,
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        """
+        Создание роли администратора вместе с созданием нового для системы
+        пользователя.
+        """
+
+        request_serializer = self.get_serializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+        administrator = AdministratorWithUserCreateService(
+            **request_serializer.validated_data
+        ).execute()
+
+        response_serializer = AdministratorSerializer(administrator)
+        return Response(
+            response_serializer.data, status=status.HTTP_201_CREATED
+        )
 
     @extend_schema(
         summary='Окончание действия роли администратора',
@@ -68,27 +93,3 @@ class AdministratorViewSet(
 
         response_serializer = AdministratorSerializer(administrator)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        summary='Создание роли администратора вместе с пользователем',
-        request=AdministratorCreateSerializer,
-        responses={
-            status.HTTP_201_CREATED: AdministratorSerializer,
-        },
-    )
-    def create(self, request, *args, **kwargs):
-        """
-        Создание роли администратора вместе с созданием нового для системы
-        пользователя.
-        """
-
-        request_serializer = self.get_serializer(data=request.data)
-        request_serializer.is_valid(raise_exception=True)
-        administrator = AdministratorWithUserCreateService(
-            **request_serializer.validated_data
-        ).execute()
-
-        response_serializer = AdministratorSerializer(administrator)
-        return Response(
-            response_serializer.data, status=status.HTTP_201_CREATED
-        )

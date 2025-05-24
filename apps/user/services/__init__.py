@@ -8,6 +8,7 @@ from .administrator.administrator_with_user_create import (
 
 # Сервисы спортсменов
 from .athlete.athlete_cancel import AthleteCancelService
+from .athlete.athlete_with_user_create import AthleteWithUserCreateService
 
 # Сервисы тренеров
 from .coach.coach_cancel import CoachCancelService
