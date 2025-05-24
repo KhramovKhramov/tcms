@@ -12,6 +12,7 @@ from .athlete.athlete_with_user_create import AthleteWithUserCreateService
 
 # Сервисы тренеров
 from .coach.coach_cancel import CoachCancelService
+from .coach.coach_with_user_create import CoachWithUserCreateService
 
 # Сервисы пользователей
 from .user.user_appoint_administrator import UserAppointAdministratorService

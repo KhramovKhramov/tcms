@@ -4,9 +4,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.user.api.filters import CoachFilter
-from apps.user.api.serializers import CoachSerializer
+from apps.user.api.serializers import CoachCreateSerializer, CoachSerializer
 from apps.user.models import Coach
-from apps.user.services import CoachCancelService
+from apps.user.services import CoachCancelService, CoachWithUserCreateService
 
 
 class CoachViewSet(
@@ -17,8 +17,39 @@ class CoachViewSet(
     # TODO если у пользователя несколько ролей тренера,
     #  должна показываться только последняя
     queryset = Coach.objects.all().order_by('-id').select_related('user')
+
     serializer_class = CoachSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CoachCreateSerializer
+        return super().get_serializer_class()
+
     filterset_class = CoachFilter
+
+    @extend_schema(
+        summary='Создание роли тренера вместе с пользователем',
+        request=CoachCreateSerializer,
+        responses={
+            status.HTTP_201_CREATED: CoachSerializer,
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        """
+        Создание роли тренера вместе с созданием нового для системы
+        пользователя.
+        """
+
+        request_serializer = self.get_serializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+        coach = CoachWithUserCreateService(
+            **request_serializer.validated_data
+        ).execute()
+
+        response_serializer = CoachSerializer(coach)
+        return Response(
+            response_serializer.data, status=status.HTTP_201_CREATED
+        )
 
     @extend_schema(
         summary='Окончание действия роли тренера',

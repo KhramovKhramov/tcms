@@ -36,6 +36,28 @@ class TestCoachCRUDApi:
 
         return self.factory.create()
 
+    @pytest.fixture
+    def create_request_data(self) -> dict:
+        """
+        Фикстура, возвращающая словарь с данными, необходимыми для
+        создания объекта модели.
+        """
+
+        user = UserFactory.build()
+        coach = CoachFactory.build()
+
+        return {
+            'user_data': {
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'date_of_birth': user.date_of_birth,
+                'gender': user.gender,
+                'phone': user.phone,
+            },
+            'position': coach.position,
+        }
+
     @staticmethod
     def _serialize_instance_detail(instance: Coach) -> dict:
         """Сериализация объекта модели для метода retrieve()."""
@@ -53,6 +75,19 @@ class TestCoachCRUDApi:
         return [
             self._serialize_instance_list(instance) for instance in instances
         ]
+
+    def test_create(self, authorized_client, create_request_data) -> None:
+        """Тест создания спортсмена вместе с пользователем."""
+
+        response = authorized_client.post(
+            self.list_url(),
+            data=create_request_data,
+            format='json',
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+        instance = self.model.objects.get(pk=response.data['id'])
+        assert response.data == self._serialize_instance_detail(instance)
 
     def test_retrieve(self, authorized_client, prepared_instance):
         """Тест получения объекта по идентификатору."""

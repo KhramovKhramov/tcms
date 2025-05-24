@@ -8,5 +8,9 @@ from .athlete import (
     AthleteCreateSerializer,
     AthleteSerializer,
 )
-from .coach import AppointCoachSerializer, CoachSerializer
+from .coach import (
+    AppointCoachSerializer,
+    CoachCreateSerializer,
+    CoachSerializer,
+)
 from .user import UserSerializer
