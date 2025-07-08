@@ -212,6 +212,7 @@ class TestUserApi:
 
         request_data = dict(
             position=CoachPosition.SENIOR,
+            coach_experience=5,
             achievements='Кандидат в мастера спорта',
         )
 
@@ -241,6 +242,8 @@ class TestUserApi:
         assert coach is not None
         assert coach.position == CoachPosition.SENIOR
         assert coach.achievements == 'Кандидат в мастера спорта'
+        assert coach.coach_experience == 5
+        assert coach.current_coach_experience == 5
 
         # Проверяем, что если у пользователя уже есть действующая роль
         # тренера, создать еще одну нельзя

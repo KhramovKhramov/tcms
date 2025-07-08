@@ -12,6 +12,7 @@ class CoachFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     date_from = timezone.now().date()
     position = CoachPosition.INSTRUCTOR
+    coach_experience = factory.Faker('random_digit')
 
     class Meta:
         model = Coach

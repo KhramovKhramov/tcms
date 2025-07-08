@@ -19,7 +19,11 @@ class CoachOrderingFilter(filters.OrderingFilter):
             for param in value
             if param not in EMPTY_VALUES
         ]
-        return qs.with_full_name_annotation().order_by(*ordering)
+        return (
+            qs.with_full_name_annotation()
+            .with_all_coach_experience_annotation()
+            .order_by(*ordering)
+        )
 
 
 class CoachFilter(FullNameFilterMixin):
@@ -31,9 +35,11 @@ class CoachFilter(FullNameFilterMixin):
         fields={
             'full_name': 'full_name',
             'position': 'position',
+            'all_coach_experience': 'all_coach_experience',
         },
         field_labels={
             'full_name': 'ФИО пользователя',
             'position': 'Должность',
+            'all_coach_experience': 'Общий тренерский стаж',
         },
     )

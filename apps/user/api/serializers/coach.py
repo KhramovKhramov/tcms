@@ -17,7 +17,19 @@ class CoachSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coach
-        fields = '__all__'
+        fields = (
+            'id',
+            'user',
+            'date_from',
+            'date_to',
+            'position',
+            'judge_category',
+            'education',
+            'additional_info',
+            'achievements',
+            'current_coach_experience',
+        )
+        extra_kwargs = {'current_coach_experience': {'read_only': True}}
 
 
 class AppointCoachSerializer(serializers.ModelSerializer):
@@ -27,6 +39,7 @@ class AppointCoachSerializer(serializers.ModelSerializer):
         model = Coach
         fields = (
             'position',
+            'coach_experience',
             'judge_category',
             'education',
             'additional_info',
@@ -34,6 +47,7 @@ class AppointCoachSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'position': {'write_only': True},
+            'coach_experience': {'write_only': True},
             'judge_category': {'write_only': True},
             'education': {'write_only': True},
             'additional_info': {'write_only': True},
@@ -54,6 +68,7 @@ class CoachCreateSerializer(serializers.ModelSerializer):
         fields = (
             'user_data',
             'position',
+            'coach_experience',
             'judge_category',
             'education',
             'additional_info',
@@ -61,6 +76,7 @@ class CoachCreateSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'position': {'write_only': True},
+            'coach_experience': {'write_only': True},
             'judge_category': {'write_only': True},
             'education': {'write_only': True},
             'additional_info': {'write_only': True},

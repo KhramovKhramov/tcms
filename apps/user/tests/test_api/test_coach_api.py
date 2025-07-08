@@ -56,6 +56,7 @@ class TestCoachCRUDApi:
                 'phone': user.phone,
             },
             'position': coach.position,
+            'coach_experience': coach.coach_experience,
         }
 
     @staticmethod
@@ -204,12 +205,20 @@ class TestCoachFilters:
         # Создаем и возвращаем администраторов для тестов
         return [
             CoachFactory.create(
-                user=users[0], position=CoachPosition.INSTRUCTOR
+                user=users[0],
+                position=CoachPosition.INSTRUCTOR,
+                coach_experience=5,
             ),
             CoachFactory.create(
-                user=users[1], position=CoachPosition.INSTRUCTOR
+                user=users[1],
+                position=CoachPosition.INSTRUCTOR,
+                coach_experience=3,
             ),
-            CoachFactory.create(user=users[2], position=CoachPosition.SENIOR),
+            CoachFactory.create(
+                user=users[2],
+                position=CoachPosition.SENIOR,
+                coach_experience=8,
+            ),
         ]
 
     @pytest.mark.parametrize(
@@ -240,6 +249,8 @@ class TestCoachFilters:
             ({'ordering': '-full_name'}, [0, 1, 2]),
             ({'ordering': 'position'}, [0, 1, 2]),
             ({'ordering': '-position'}, [2, 0, 1]),
+            ({'ordering': 'all_coach_experience'}, [1, 0, 2]),
+            ({'ordering': '-all_coach_experience'}, [2, 0, 1]),
         ],
     )
     def test_ordering(

@@ -1,6 +1,14 @@
 from common.managers import UserFullNameAnnotationMixin
 from django.contrib.auth.base_user import BaseUserManager
-from django.db.models import QuerySet
+from django.db.models import (
+    ExpressionWrapper,
+    F,
+    IntegerField,
+    QuerySet,
+)
+from django.utils.timezone import now
+
+from apps.user.models.utils import YearsBetween
 
 
 class UserQuerySet(QuerySet, UserFullNameAnnotationMixin):
@@ -61,6 +69,17 @@ class AdministratorManager(BaseUserManager):
 
 class CoachQuerySet(QuerySet, UserFullNameAnnotationMixin):
     user_field_name = 'user'
+
+    def with_all_coach_experience_annotation(self):
+        """Добавляет на уровне SQL аннотацию с общим тренерским стажем."""
+
+        return self.annotate(
+            all_coach_experience=ExpressionWrapper(
+                YearsBetween(now().date(), F('date_from'))
+                + F('coach_experience'),
+                output_field=IntegerField(),
+            )
+        )
 
 
 class CoachManager(BaseUserManager):

@@ -33,6 +33,7 @@ def serialize_coach(coach: Coach) -> dict:
         if isinstance(coach.date_to, date)
         else coach.date_to,
         'position': coach.position,
+        'current_coach_experience': coach.current_coach_experience,
         'judge_category': coach.judge_category,
         'education': coach.education,
         'additional_info': coach.additional_info,

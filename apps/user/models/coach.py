@@ -1,4 +1,7 @@
+from dateutil.relativedelta import relativedelta
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.timezone import now
 
 from apps.user.models.choices import CoachPosition, JudgeCategory
 from apps.user.models.managers import CoachManager
@@ -27,7 +30,11 @@ class Coach(models.Model):
         null=True,
     )
 
-    # TODO добавить стаж работы
+    coach_experience = models.IntegerField(
+        verbose_name='Тренерский стаж (полных лет) на дату приема',
+        validators=[MinValueValidator(0), MaxValueValidator(99)],
+        default=0,
+    )
 
     position = models.CharField(
         verbose_name='Должность',
@@ -65,3 +72,12 @@ class Coach(models.Model):
 
     def __str__(self) -> str:
         return self.user.full_name
+
+    @property
+    def current_coach_experience(self) -> int:
+        """Расчет общего тренерского стажа."""
+
+        today = now().date()
+        delta = relativedelta(today, self.date_from)
+
+        return delta.years + self.coach_experience
