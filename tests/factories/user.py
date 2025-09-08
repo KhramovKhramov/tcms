@@ -1,5 +1,4 @@
 import factory
-
 from apps.user.models import User
 from apps.user.models.choices import GenderType
 

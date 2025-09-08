@@ -1,9 +1,9 @@
 import pytest
 from apps.user.models import User
-from apps.user.tests.factories import UserFactory
 from rest_framework import status
-from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
+
+from tests.factories import UserFactory
 
 
 @pytest.fixture
@@ -65,14 +65,6 @@ def authorized_superuser_client(test_superuser) -> APIClient:
     return client
 
 
-def get_api_url(basename: str, url_path: str, pk: int | None = None) -> str:
-    """Получение url для запроса через APIClient."""
-
-    if pk is None:
-        return reverse(f'{basename}-{url_path}')
-    return reverse(f'{basename}-{url_path}', kwargs={'pk': pk})
-
-
 def check_filters_and_ordering(
     url, authorized_client, data, params, expected_objects
 ) -> None:
@@ -95,4 +87,7 @@ def check_filters_and_ordering(
 
     actual_ids = [item['id'] for item in response_data]
     expected_ids = [data[i].pk for i in expected_objects]
-    assert actual_ids == expected_ids
+    assert actual_ids == expected_ids, (
+        f'params: {params}, '
+        f'expected_ids: {expected_ids}, actual_ids: {actual_ids}'
+    )
